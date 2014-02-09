@@ -1,4 +1,4 @@
 aws-cloudfront-sign
 ===================
 
-Utility module for AWS CloudFront
+Utility module for signing AWS CloudFront URLs
