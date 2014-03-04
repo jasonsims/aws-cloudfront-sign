@@ -23,6 +23,7 @@ npm install aws-cloudfront-sign
 var cf = require('aws-cloudfront-sign')
 var params = {
   privateKeyString: process.env.PRIVATE_KEY,
+  privateKeyPath: '/path/to/private/key',      // Optional. Use as an alternative to privateKeyString.
   expireTime: '<epoch time when you wish the link to expire>'
 }
 cf.getSignedUrl('http://example.com/path/to/s3/object', params, function(err, url) {
