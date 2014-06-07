@@ -1,6 +1,6 @@
 {
   "name": "aws-cloudfront-sign",
-  "version": "0.0.4",
+  "version": "1.0.0",
   "description": "Utility module for signing AWS CloudFront URLs",
   "main": "./lib/cloudfront-util.js",
   "scripts": {},
@@ -19,6 +19,6 @@
     "url": "https://github.com/jasonsims/aws-cloudfront-sign/issues"
   },
   "dependencies": {
-    
+
   }
 }
