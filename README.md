@@ -27,7 +27,6 @@ var params = {
   privateKeyPath: '/path/to/private/key',      // Optional. Use as an alternative to privateKeyString.
   expireTime: '<epoch time when you wish the link to expire>'
 }
-cf.getSignedUrl('http://example.com/path/to/s3/object', params, function(err, url) {
-  console.log('Signed URL: ' + url)
-})
+var signedUrl = cf.getSignedUrl('http://example.com/path/to/s3/object', params);
+console.log('Signed URL: ' + signedUrl);
 ```
