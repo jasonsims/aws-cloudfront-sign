@@ -3,11 +3,15 @@
   "version": "1.0.0",
   "description": "Utility module for signing AWS CloudFront URLs",
   "author": "Jason Sims <sims.jrobert@gmail.com>",
-  "contributors": [{
-    "name": "Matt Palmerlee"
-  }],
+  "contributors": [
+    {
+      "name": "Matt Palmerlee"
+    }
+  ],
   "main": "./lib/cloudfront-util.js",
-  "scripts": {},
+  "scripts": {
+    "test": "node ./test/lib/cloud-front-util.test.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/jasonsims/aws-cloudfront-sign.git"
@@ -21,7 +25,8 @@
   "bugs": {
     "url": "https://github.com/jasonsims/aws-cloudfront-sign/issues"
   },
-  "dependencies": {
-
+  "dependencies": {},
+  "devDependencies": {
+    "tap": "^0.4.12"
   }
 }
