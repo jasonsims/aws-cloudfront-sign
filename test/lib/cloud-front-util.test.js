@@ -12,8 +12,8 @@ var path = require('path')
 
 test('canned policy', function(t) {
   var now = new Date()
-    , result = url.parse(cf.getSignedUrl('http://foo.com', DEFAULT_PARAMS))
-  ;
+    , result = url.parse(cf.getSignedUrl('http://foo.com', DEFAULT_PARAMS));
+
   result.query = querystring.parse(result.search.split('?')[1]);
   t.equal(result.hostname, 'foo.com', 'it should set the appropriate domain');
   t.equal(result.query['Key-Pair-Id'], DEFAULT_PARAMS.keypairId, 'it should set the key pair id');
@@ -21,3 +21,31 @@ test('canned policy', function(t) {
   t.ok(29 <= expireDiff && 31 >= expireDiff, 'it should default `expires` to ~30 seconds from creation date')
   t.end();
 });
+
+test('signature', function(t) {
+  var result = parseUrl(cf.getSignedUrl('http://foo.com', DEFAULT_PARAMS));
+  t.ok(result.query.hasOwnProperty('Signature'), 'it should be created');
+  t.end();
+})
+
+test('signature#_normalizeSignature', function(t) {
+  var illegalChars = ['+', '=', '/']
+  var arg = illegalChars.join('')
+  var sig = cf._normalizeSignature(arg)
+
+  t.ok('-_~', 'it should translate illegal characters');
+  t.end();
+})
+
+/**
+ * Parse a URL string
+ *
+ * @param {String} Full url to parse
+ * @return {Object}
+ */
+function parseUrl(str) {
+  var _url = url.parse(str)
+  _url.query = querystring.parse(_url.query)
+
+  return _url
+}
