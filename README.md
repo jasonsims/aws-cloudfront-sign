@@ -26,7 +26,7 @@ var params = {
   keypairId: process.env.PUBLIC_KEY,
   privateKeyString: process.env.PRIVATE_KEY,
   privateKeyPath: '/path/to/private/key',      // Optional. Use as an alternative to privateKeyString.
-  expireTime: new Date(new Date().getTime() + (1000 * 100)) // Now + 100 seconds
+  expireTime: new Date(2016, 0, 1) // January 1, 2016
 }
 var signedUrl = cf.getSignedUrl('http://example.com/path/to/s3/object', params);
 console.log('Signed URL: ' + signedUrl);

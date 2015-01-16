@@ -10,7 +10,7 @@ var DEFAULT_PARAMS = {
     path.join(process.cwd(), 'test/files/dummy.pem')).toString('ascii')
 };
 
-test('canned policy', function(t) {
+test('canned policy', function (t) {
   var now = new Date();
   var result = url.parse(cf.getSignedUrl('http://foo.com', DEFAULT_PARAMS));
   var expireDiff;
@@ -27,13 +27,13 @@ test('canned policy', function(t) {
   t.end();
 });
 
-test('signature', function(t) {
+test('signature', function (t) {
   var result = parseUrl(cf.getSignedUrl('http://foo.com', DEFAULT_PARAMS));
   t.ok(result.query.hasOwnProperty('Signature'), 'it should be created');
   t.end();
 });
 
-test('signature#_normalizeSignature', function(t) {
+test('signature#_normalizeSignature', function (t) {
   var illegalChars = ['+', '=', '/'];
   var arg = illegalChars.join('');
   var sig = cf._normalizeSignature(arg);
@@ -42,11 +42,11 @@ test('signature#_normalizeSignature', function(t) {
   t.end();
 });
 
-test('canned policy types', function(t) {
+test('canned policy types', function (t) {
   var result1 = url.parse(cf.getSignedUrl('http://foo.com', {
     keypairId: 'ABC123',
     privateKeyString: fs.readFileSync(
-        path.join(process.cwd(), 'test/files/dummy.pem')).toString('ascii'),
+      path.join(process.cwd(), 'test/files/dummy.pem')).toString('ascii'),
     expireTime: ((new Date(2033, 1, 1)).getTime() / 1000).toString()
   }));
   t.ok(result1.path.indexOf('=1990857600') > -1, 'it should support legacy unix time strings as expire times.');
@@ -54,7 +54,7 @@ test('canned policy types', function(t) {
   var result2 = url.parse(cf.getSignedUrl('http://foo.com', {
     keypairId: 'ABC123',
     privateKeyString: fs.readFileSync(
-        path.join(process.cwd(), 'test/files/dummy.pem')).toString('ascii'),
+      path.join(process.cwd(), 'test/files/dummy.pem')).toString('ascii'),
     expireTime: ((new Date(2033, 1, 1)).getTime() / 1000)
   }));
   t.ok(result2.path.indexOf('=1990857600') > -1, 'it should support integer time expire times.');
@@ -62,7 +62,7 @@ test('canned policy types', function(t) {
   var result3 = url.parse(cf.getSignedUrl('http://foo.com', {
     keypairId: 'ABC123',
     privateKeyString: fs.readFileSync(
-        path.join(process.cwd(), 'test/files/dummy.pem')).toString('ascii'),
+      path.join(process.cwd(), 'test/files/dummy.pem')).toString('ascii'),
     expireTime: new Date(2033, 1, 1)
   }));
   t.ok(result3.path.indexOf('=1990857600') > -1, 'it should support Date objects as expire times.');
@@ -73,10 +73,11 @@ test('canned policy types', function(t) {
     result4 = url.parse(cf.getSignedUrl('http://foo.com', {
       keypairId: 'ABC123',
       privateKeyString: fs.readFileSync(
-          path.join(process.cwd(), 'test/files/dummy.pem')).toString('ascii'),
+        path.join(process.cwd(), 'test/files/dummy.pem')).toString('ascii'),
       expireTime: new Date(1000, 1, 1)
     }));
-  } catch(e) {}
+  } catch (e) {
+  }
   t.ok(typeof(result4) == 'undefined', 'it should alert the developer about urls that have already expired.');
 
   var result5;
@@ -85,20 +86,21 @@ test('canned policy types', function(t) {
     result5 = url.parse(cf.getSignedUrl('http://foo.com', {
       keypairId: 'ABC123',
       privateKeyString: fs.readFileSync(
-          path.join(process.cwd(), 'test/files/dummy.pem')).toString('ascii'),
+        path.join(process.cwd(), 'test/files/dummy.pem')).toString('ascii'),
       expireTime: new Date(3000, 1, 1)
     }));
-  } catch(e) {}
+  } catch (e) {
+  }
   t.ok(typeof(result5) == 'undefined', 'it should alert the developer about invalid unix dates that AWS will not accept.');
 
   t.end();
 });
 
-test('RTMP URL Objects', function(t) {
+test('RTMP URL Objects', function (t) {
   var result1 = cf.getSignedRTMPUrl('xxxxxx.cloudfront.net', 'mykeyfolder/mykey.mp4', {
     keypairId: 'ABC123',
     privateKeyString: fs.readFileSync(
-        path.join(process.cwd(), 'test/files/dummy.pem')).toString('ascii'),
+      path.join(process.cwd(), 'test/files/dummy.pem')).toString('ascii'),
     expireTime: new Date(2033, 1, 1)
   });
   t.ok(result1.rtmpServerPath.indexOf('cfx/st') > -1, 'it should return a properly formatted rtmp server path.');
