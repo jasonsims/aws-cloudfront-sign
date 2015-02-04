@@ -26,8 +26,12 @@ var params = {
   keypairId: process.env.PUBLIC_KEY,
   privateKeyString: process.env.PRIVATE_KEY,
   privateKeyPath: '/path/to/private/key',      // Optional. Use as an alternative to privateKeyString.
-  expireTime: '<epoch time when you wish the link to expire>'
+  expireTime: new Date(2016, 0, 1) // January 1, 2016
 }
 var signedUrl = cf.getSignedUrl('http://example.com/path/to/s3/object', params);
 console.log('Signed URL: ' + signedUrl);
+
+var signedRTMPUrlObj = cf.getSignedRTMPUrl('xxxxxxx.cloudfront.net', 'path/to/s3/object', params);
+console.log('RTMP Server Path: ' + signedRTMPUrlObj.rtmpServerPath);
+console.log('Signed Stream Name: ' + signedRTMPUrlObj.rtmpStreamName);
 ```
