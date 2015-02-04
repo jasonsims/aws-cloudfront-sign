@@ -10,7 +10,7 @@
   ],
   "main": "./lib/cloudfrontUtil.js",
   "scripts": {
-    "test": "node ./test/lib/cloud-front-util.test.js"
+    "test": "node ./test/lib/cloudfrontUtil.test.js"
   },
   "repository": {
     "type": "git",

@@ -3,7 +3,7 @@ var url = require('url');
 var querystring = require('querystring');
 var fs = require('fs');
 var test = require('tap').test;
-var cf = require(path.join(process.cwd(), 'lib', 'cloudfront-util'));
+var cf = require(path.join(process.cwd(), 'lib', 'cloudfrontUtil'));
 var DEFAULT_PARAMS = {
   keypairId: 'ABC123',
   privateKeyString: fs.readFileSync(
