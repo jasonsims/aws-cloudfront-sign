@@ -1,5 +1,7 @@
+var _ = require('lodash')
 var path = require('path');
 var url = require('url');
+var moment = require('moment')
 var querystring = require('querystring');
 var fs = require('fs');
 var test = require('tap').test;
@@ -11,19 +13,16 @@ var DEFAULT_PARAMS = {
 };
 
 test('canned policy', function (t) {
-  var now = new Date();
-  var result = url.parse(cf.getSignedUrl('http://foo.com', DEFAULT_PARAMS));
-  var expireDiff;
+  var now = new Date().getTime() / 1000;
+  var testUrl = cf.getSignedUrl('http://foo.com', DEFAULT_PARAMS)
+  var result = url.parse(testUrl, true);
+  var expireDiff = (parseInt(result.query.Expires) - now)
 
-  result.query = querystring.parse(result.search.split('?')[1]);
   t.equal(result.hostname, 'foo.com', 'it should set the appropriate domain');
   t.equal(result.query['Key-Pair-Id'], DEFAULT_PARAMS.keypairId,
     'it should set the key pair id');
-
-  expireDiff = Math.abs(
-    new Date(result.query.Expires * 1000).getSeconds() - now.getSeconds());
   t.ok(29 <= expireDiff && 31 >= expireDiff,
-    'it should default `expires` to ~30 seconds from creation date');
+    'it should default `expires` to 30 seconds from creation date');
   t.end();
 });
 
@@ -32,6 +31,18 @@ test('signature', function (t) {
   t.ok(result.query.hasOwnProperty('Signature'), 'it should be created');
   t.end();
 });
+
+test('cloudfrontUtil#getSignedUrl()', function(t) {
+  var testExpireTime = moment().add(1, 'day');
+  var params = _.extend({}, DEFAULT_PARAMS, {expireTime: testExpireTime});
+  var res = cf.getSignedUrl('http://foo.com', params);
+  var resUrl = url.parse(res, true);
+  var actualTime = parseInt(resUrl.query.Expires);
+  var expectedTime = testExpireTime.unix();
+
+  t.ok(expectedTime === actualTime, 'should accept a moment object');
+  t.end();
+})
 
 test('signature#_normalizeSignature', function (t) {
   var illegalChars = ['+', '=', '/'];
@@ -47,7 +58,7 @@ test('canned policy types', function (t) {
     keypairId: 'ABC123',
     privateKeyString: fs.readFileSync(
       path.join(process.cwd(), 'test/files/dummy.pem')).toString('ascii'),
-    expireTime: ((new Date(2033, 1, 1)).getTime() / 1000).toString()
+    expireTime: ((new Date(2033, 1, 1)).getTime()).toString()
   }));
   t.ok(result1.path.indexOf('=1990857600') > -1, 'it should support legacy unix time strings as expire times.');
 
@@ -55,7 +66,7 @@ test('canned policy types', function (t) {
     keypairId: 'ABC123',
     privateKeyString: fs.readFileSync(
       path.join(process.cwd(), 'test/files/dummy.pem')).toString('ascii'),
-    expireTime: ((new Date(2033, 1, 1)).getTime() / 1000)
+    expireTime: ((new Date(2033, 1, 1)).getTime())
   }));
   t.ok(result2.path.indexOf('=1990857600') > -1, 'it should support integer time expire times.');
 
