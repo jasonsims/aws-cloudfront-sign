@@ -4,6 +4,13 @@
 [tbuchok]: https://github.com/tbuchok
 [alexsaves]: https://github.com/alexsaves
 
+## 2.0.0 (2015-03-29)
+* feature: [@jasonsims][jasonsims]: Add support for momentjs
+* bugfix: [@jasonsims][jasonsims]: Fix malformed query param issue
+* develop: [@jasonsims][jasonsims]: Misc API refactors
+* develop: [@jasonsims][jasonsims]: Refactor of the test suite
+* develop: [@jasonsims][jasonsims]: Add more description to API options in README.md
+
 ## 1.2.0 (2014-12-31)
 * development: [@alexsaves][alexsaves]: Supporting JavaScript dates for expireTime
 * development: [@alexsaves][alexsaves]: Added range and type checking
@@ -11,7 +18,7 @@
 
 ## 1.1.0 (2014-11-26)
 * bugfix: [@gregt590][gregt590]: Normalize AWS signature strings
-* development: [@tbuchok][tbuchok]: Add initial unit tests 
+* development: [@tbuchok][tbuchok]: Add initial unit tests
 * development: [@jasonsims][jasonsims]: Add tests for AWS signature
 * development: [@jasonsims][jasonsims]: Cleanup code style
 
