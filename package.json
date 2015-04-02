@@ -1,6 +1,6 @@
 {
   "name": "aws-cloudfront-sign",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "description": "Utility module for signing AWS CloudFront URLs",
   "author": "Jason Sims <sims.jrobert@gmail.com>",
   "contributors": [
@@ -8,9 +8,9 @@
       "name": "Matt Palmerlee"
     }
   ],
-  "main": "./lib/cloudfront-util.js",
+  "main": "./lib/cloudfrontUtil.js",
   "scripts": {
-    "test": "node ./test/lib/cloud-front-util.test.js"
+    "test": "./node_modules/.bin/mocha"
   },
   "repository": {
     "type": "git",
@@ -25,8 +25,13 @@
   "bugs": {
     "url": "https://github.com/jasonsims/aws-cloudfront-sign/issues"
   },
-  "dependencies": {},
+  "dependencies": {
+    "lodash": "^3.6.0"
+  },
   "devDependencies": {
-    "tap": "^0.4.12"
+    "chai": "^2.2.0",
+    "mocha": "^2.2.1",
+    "moment": "^2.9.0",
+    "sinon": "^1.14.1"
   }
 }
