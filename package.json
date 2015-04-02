@@ -10,7 +10,7 @@
   ],
   "main": "./lib/cloudfrontUtil.js",
   "scripts": {
-    "test": "node ./test/lib/cloudfrontUtil.test.js"
+    "test": "./node_modules/.bin/mocha"
   },
   "repository": {
     "type": "git",
@@ -29,7 +29,9 @@
     "lodash": "^3.6.0"
   },
   "devDependencies": {
-    "tap": "^0.4.12",
-    "moment": "^2.9.0"
+    "chai": "^2.2.0",
+    "mocha": "^2.2.1",
+    "moment": "^2.9.0",
+    "sinon": "^1.14.1"
   }
 }
