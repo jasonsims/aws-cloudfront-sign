@@ -1,11 +1,16 @@
 AWS CloudFront URL Signature Utility  
 ===================
 [![Circle CI](https://circleci.com/gh/jasonsims/aws-cloudfront-sign/tree/master.svg?style=svg)](https://circleci.com/gh/jasonsims/aws-cloudfront-sign/tree/master)
+[![npm version](https://badge.fury.io/js/aws-cloudfront-sign.svg)](http://badge.fury.io/js/aws-cloudfront-sign)
 
 Generating signed URLs for CloudFront links is a little more tricky than for S3. It's because signature generation for S3 URLs is handled a bit differently than CloudFront URLs and this functionality is not currently supported by the [aws-sdk](https://github.com/aws/aws-sdk-js) library for JavaScript. In case you also need to do this, I've created this simple utility to make things easier.
 
-## Setup
-###Configure CloudFront
+## Usage
+### Requirements
+* Node.js >=0.10.0
+* Active CloudFront distribution with origin configured
+
+### Configuring CloudFront
 1. Create a CloudFront distribution
 2. Configure your origin with the following settings:
 
@@ -14,38 +19,39 @@ Generating signed URLs for CloudFront links is a little more tricky than for S3.
    **Grant Read Permissions on Bucket:** Yes, Update Bucket Policy  
 3. Create CloudFront Key Pair.
 
-###Installation &nbsp;  [![npm version](https://badge.fury.io/js/aws-cloudfront-sign.svg)](http://badge.fury.io/js/aws-cloudfront-sign)
+### Installing
 ```sh
 npm install aws-cloudfront-sign
 ```
 
-###Usage
-```js
-var cf = require('aws-cloudfront-sign')
-```
-####getSignedUrl(url, options)
-```js
-var signedUrl = cf.getSignedUrl('http://http://xxxxxxx.cloudfront.net/path/to/s3/object', options);
-console.log('Signed URL: ' + signedUrl);
-```
-* `url`: Cloudfront URL to sign
+### Upgrading from 1.x to 2.x
+* `expireTime` now takes it's value as milliseconds, Date, or
+ [moment][moment_docs] instead of seconds.
 
-####getSignedRTMPUrl(domainName, s3key, options)
-```js
-var signedRTMPUrlObj = cf.getSignedRTMPUrl('xxxxxxx.cloudfront.net', '/path/to/s3/object', options);
-console.log('RTMP Server Path: ' + signedRTMPUrlObj.rtmpServerPath);
-console.log('Signed Stream Name: ' + signedRTMPUrlObj.rtmpStreamName);
-```
-* `domainName`: Domain name of your Cloudfront distribution
-* `s3key`: Path to s3 object
+### API
+#### getSignedUrl(url, options)
+* `@param {String} url` - Cloudfront URL to sign
+* `@param {Object} options` - URL signature [options](#options)
+* `@return {String} signedUrl` - Signed CloudFrontUrl
 
-####Options
-* `expireTime` - The time when the URL should expire. Accepted values are
+#### getSignedRTMPUrl(domainName, s3key, options)
+* `@param {String} domainName` - Domain name of your Cloudfront distribution
+* `@param {String} s3key` - Path to s3 object
+* `@param {Object} options` - URL signature [options](#options)
+* `@return {Object} url.rtmpServerPath` - RTMP formatted server path
+* `@return {Object} url.rtmpStreamName` - Signed RTMP formatted stream name
+
+### Options
+* `expireTime` (**Optional** - Default: 30s) - The time when the URL should
+   expire. Accepted values are
    * number - Time in milliseconds (`new Date().getTime() + 30000`)
-   * moment - Valid [momentjs](http://momentjs.com/docs) object (`moment().add(1, 'day')`)
+   * moment - Valid [momentjs][moment_docs] object (`moment().add(1, 'day')`)
    * Date - Javascript Date object (`new Date(2016, 0, 1)`)
 * `keypairId` - The access key ID from your Cloudfront keypair
-* `privateKeyString` || `privateKeyPath` - The private key from your Cloudfront keypair. It can be provided as either a string or a path to the .pem file. **Note:** When providing the private key as a string ensure that the newline character is also included.
+* `privateKeyString` || `privateKeyPath` - The private key from your Cloudfront
+   keypair. It can be provided as either a string or a path to the .pem file.
+  **Note:** When providing the private key as a string, ensure that the newline
+  character is also included.
 
   ```js
   var privateKeyString =
@@ -68,3 +74,23 @@ console.log('Signed Stream Name: ' + signedRTMPUrlObj.rtmpStreamName);
   # Heroku env
   heroku config:set CF_PRIVATE_KEY="$(cat your-private-key.pem)"  
   ```
+
+## Examples
+### Creating a signed URL
+```js
+var cf = require('aws-cloudfront-sign')
+var options = {keypairId: 'APKAJM2FEVTI7BNPCY4A', privateKeyPath: '/foo/bar'}
+var signedUrl = cf.getSignedUrl('http://http://xxxxxxx.cloudfront.net/path/to/s3/object', options);
+console.log('Signed URL: ' + signedUrl);
+```
+
+### Creating a signed RTMP URL
+```js
+var cf = require('aws-cloudfront-sign')
+var options = {keypairId: 'APKAJM2FEVTI7BNPCY4A', privateKeyPath: '/foo/bar'}
+var signedRTMPUrlObj = cf.getSignedRTMPUrl('xxxxxxx.cloudfront.net', '/path/to/s3/object', options);
+console.log('RTMP Server Path: ' + signedRTMPUrlObj.rtmpServerPath);
+console.log('Signed Stream Name: ' + signedRTMPUrlObj.rtmpStreamName);
+```
+
+[moment_docs]: http://momentjs.com/docs
