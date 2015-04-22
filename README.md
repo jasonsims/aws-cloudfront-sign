@@ -80,7 +80,7 @@ npm install aws-cloudfront-sign
 ```js
 var cf = require('aws-cloudfront-sign')
 var options = {keypairId: 'APKAJM2FEVTI7BNPCY4A', privateKeyPath: '/foo/bar'}
-var signedUrl = cf.getSignedUrl('http://http://xxxxxxx.cloudfront.net/path/to/s3/object', options);
+var signedUrl = cf.getSignedUrl('http://xxxxxxx.cloudfront.net/path/to/s3/object', options);
 console.log('Signed URL: ' + signedUrl);
 ```
 
