@@ -3,6 +3,12 @@
 [gregt590]: https://github.com/gregt590
 [tbuchok]: https://github.com/tbuchok
 [alexsaves]: https://github.com/alexsaves
+[fponticelli]: https://github.com/fponticelli
+
+## 2.0.1 (2015-04-21)
+* develop: [@fponticelli][fponticelli]: Fix typo in usage examples
+* develop: [@jasonsims][jasonsims]: Switch to TravisCI
+* develop: [@jasonsims][jasonsims]: Add more descriptive usage examples
 
 ## 2.0.0 (2015-03-29)
 * feature: [@jasonsims][jasonsims]: Add support for momentjs
