@@ -132,6 +132,19 @@ describe('CloudfrontUtil', function() {
       done();
     });
 
+    it('should add base64-encoded `Policy` query param', function(done) {
+      var params = _.extend({}, defaultParams);
+      var result = CloudfrontUtil.getSignedUrl('http://foo.com', params);
+      var parsedResult = url.parse(result, true);
+      var policy = JSON.parse(new Buffer(parsedResult.query.Policy,
+        'base64').toString('ascii'));
+
+      expect(policy).to.have.property('Statement');
+      expect(policy.Statement[0]).to.have.property('Resource');
+      expect(policy.Statement[0].Resource).to.equal('http://foo.com');
+      done();
+    });
+
     it('should include original query params', function(done) {
       var params = _.extend({}, defaultParams);
       var result = CloudfrontUtil.getSignedUrl(
@@ -142,6 +155,7 @@ describe('CloudfrontUtil', function() {
       expect(parsedResult.query).to.have.property('Expires');
       expect(parsedResult.query).to.have.property('Signature');
       expect(parsedResult.query).to.have.property('Key-Pair-Id');
+      expect(parsedResult.query).to.have.property('Policy');
 
       done();
     });
@@ -154,6 +168,7 @@ describe('CloudfrontUtil', function() {
       expect(parsedResult.query).to.have.property('Expires');
       expect(parsedResult.query).to.have.property('Signature');
       expect(parsedResult.query).to.have.property('Key-Pair-Id');
+      expect(parsedResult.query).to.have.property('Policy');
 
       done();
     });
