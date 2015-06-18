@@ -93,4 +93,17 @@ console.log('RTMP Server Path: ' + signedRTMPUrlObj.rtmpServerPath);
 console.log('Signed Stream Name: ' + signedRTMPUrlObj.rtmpStreamName);
 ```
 
+### Creating signed cookies
+```js
+var cf = require('aws-cloudfront-sign')
+var options = {keypairId: 'APKAJM2FEVTI7BNPCY4A', privateKeyPath: '/foo/bar'}
+var signedCookies = cf.getSignedCookies('http://xxxxxxx.cloudfront.net/*', options);
+
+// You can now set cookies in your response header. For example:
+for(var key in signedCookies){
+  res.cookie(key,signedCookies[key]);
+}
+```
+
+
 [moment_docs]: http://momentjs.com/docs
