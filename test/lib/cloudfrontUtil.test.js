@@ -224,18 +224,18 @@ describe('CloudfrontUtil', function() {
     });
   });
 
-  describe('#normalizeSignature()', function() {
+  describe('#safeBase64()', function() {
     it('should translate illegal characters', function(done) {
       var illegalChars = ['+', '=', '/'];
       var arg = illegalChars.join('');
-      var sig = CloudfrontUtil.normalizeSignature(arg);
+      var sig = CloudfrontUtil.safeBase64(arg);
 
       expect(sig).to.equal('-_~');
       done();
     });
 
     it('should not alter valid characters', function(done) {
-      var sig = CloudfrontUtil.normalizeSignature('test+str');
+      var sig = CloudfrontUtil.safeBase64('test+str');
 
       expect(sig).to.equal('test-str');
       done();
