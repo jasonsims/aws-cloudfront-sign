@@ -49,6 +49,22 @@ describe('CannedPolicy', function() {
       expect(func).to.throw(Error, /.*must be after the current time$/i);
       done();
     });
+    it('should return a canned policy with ip address restriction', function(done) {
+      var expireTimeMs = new Date().getTime() + 10000;
+      var policy = new CannedPolicy('http://t.com', expireTimeMs, "1.2.3.0/24");
+      var result = policy.toJSON();
+      var parsedResult;
+
+      expect(result).to.be.a('string');
+
+      // Parse the stringified result so we can examine it's properties.
+      parsedResult = JSON.parse(result);
+
+      expect(parsedResult).to.have.deep.property(
+        'Statement[0].Condition.IpAddress.AWS:SourceIp', "1.2.3.0/24");
+
+      done();
+    });
     it('should return the canned policy as stringified JSON', function(done) {
       var expireTimeMs = new Date().getTime() + 10000;
       var expireTimeSecs = Math.round(expireTimeMs / 1000);
