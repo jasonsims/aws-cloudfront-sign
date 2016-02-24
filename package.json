@@ -28,6 +28,7 @@
   "dependencies": {
     "lodash": "^3.6.0"
   },
+  "tonicExampleFilename": "./examples/signedURL.js",
   "devDependencies": {
     "chai": "^2.2.0",
     "mocha": "^2.2.1",
