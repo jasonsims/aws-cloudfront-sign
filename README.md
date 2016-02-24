@@ -52,6 +52,9 @@ npm install aws-cloudfront-sign
    * number - Time in milliseconds (`new Date().getTime() + 30000`)
    * moment - Valid [momentjs][moment_docs] object (`moment().add(1, 'day')`)
    * Date - Javascript Date object (`new Date(2016, 0, 1)`)
+* `ipRange` (**Optional**) - IP address range allowed to make GET requests
+  for your signed URL. This value must be given in standard IPv4 CIDR format
+  (for example, 10.52.176.0/24).
 * `keypairId` - The access key ID from your Cloudfront keypair
 * `privateKeyString` || `privateKeyPath` - The private key from your Cloudfront
    keypair. It can be provided as either a string or a path to the .pem file.
