@@ -8,6 +8,9 @@
 [benburkhart1]: https://github.com/benburkhart1
 [dnjohnson]: https://github.com/dnjohnson
 
+## 2.1.1 (2016-02-24)
+* feature: [@jasonsims][jasonsims]: Added support for NPM tonic examples
+
 ## 2.1.0 (2016-02-24)
 * feature: [@benburkhart1][benburkhart1]: Added `ipRange` option to support source IP restrictions
 * feature: [@darrendao][darrendao]: Added `getSignedCookies` API
