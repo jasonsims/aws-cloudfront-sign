@@ -4,6 +4,14 @@
 [tbuchok]: https://github.com/tbuchok
 [alexsaves]: https://github.com/alexsaves
 [fponticelli]: https://github.com/fponticelli
+[darrendao]: https://github.com/darrendao
+[benburkhart1]: https://github.com/benburkhart1
+[dnjohnson]: https://github.com/dnjohnson
+
+## 2.1.0 (2016-02-24)
+* feature: [@benburkhart1][benburkhart1]: Added `ipRange` option to support source IP restrictions
+* feature: [@darrendao][darrendao]: Added `getSignedCookies` API
+* feature: [@dnjohnson][dnjohnson]: Updated the signed URL to also include the policy
 
 ## 2.0.1 (2015-04-21)
 * develop: [@fponticelli][fponticelli]: Fix typo in usage examples
