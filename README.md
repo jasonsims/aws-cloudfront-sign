@@ -17,7 +17,7 @@ Generating signed URLs for CloudFront links is a little more tricky than for S3.
    **Origin Domain Name:** {your-s3-bucket}  
    **Restrict Bucket Access:** Yes  
    **Grant Read Permissions on Bucket:** Yes, Update Bucket Policy  
-3. Create CloudFront Key Pair.
+3. Create CloudFront Key Pair. [more info][cf_keypair_docs]
 
 ### Installing
 ```sh
@@ -114,3 +114,4 @@ for(var cookieId in signedCookies) {
 ```
 
 [moment_docs]: http://momentjs.com/docs
+[cf_keypair_docs]: http://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-trusted-signers.html#private-content-creating-cloudfront-key-pairs
