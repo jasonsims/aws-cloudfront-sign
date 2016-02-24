@@ -136,8 +136,7 @@ describe('CloudfrontUtil', function() {
       var params = _.extend({}, defaultParams);
       var result = CloudfrontUtil.getSignedUrl('http://foo.com', params);
       var parsedResult = url.parse(result, true);
-      var policy = JSON.parse(new Buffer(parsedResult.query.Policy,
-        'base64').toString('ascii'));
+      var policy = _deserializePolicy(parsedResult.query.Policy);
 
       expect(policy).to.have.property('Statement');
       expect(policy.Statement[0]).to.have.property('Resource');
@@ -224,21 +223,35 @@ describe('CloudfrontUtil', function() {
     });
   });
 
-  describe('#normalizeSignature()', function() {
+  describe('#normalizeBase64()', function() {
     it('should translate illegal characters', function(done) {
       var illegalChars = ['+', '=', '/'];
       var arg = illegalChars.join('');
-      var sig = CloudfrontUtil.normalizeSignature(arg);
+      var sig = CloudfrontUtil.normalizeBase64(arg);
 
       expect(sig).to.equal('-_~');
       done();
     });
 
     it('should not alter valid characters', function(done) {
-      var sig = CloudfrontUtil.normalizeSignature('test+str');
+      var sig = CloudfrontUtil.normalizeBase64('test+str');
 
       expect(sig).to.equal('test-str');
       done();
     });
   });
 });
+
+// Private
+//--------
+
+function _deserializePolicy(policy) {
+  var safeBase64Chars = {'+': '-', '=': '_', '/': '~'};
+
+  _.each(safeBase64Chars, function(safeChar, actualChar) {
+    var re = new RegExp('\\' + safeChar, 'g');
+    policy = policy.replace(re, actualChar);
+  });
+
+  return JSON.parse(new Buffer(policy, 'base64').toString('ascii'));
+}

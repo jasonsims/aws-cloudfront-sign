@@ -41,6 +41,11 @@ npm install aws-cloudfront-sign
 * `@return {Object} url.rtmpServerPath` - RTMP formatted server path
 * `@return {Object} url.rtmpStreamName` - Signed RTMP formatted stream name
 
+#### getSignedCookies(url, options)
+* `@param {String} url` - Cloudfront URL to sign
+* `@param {Object} options` - URL signature [options](#options)
+* `@return {Object} cookies` - Signed AWS cookies
+
 ### Options
 * `expireTime` (**Optional** - Default: 30s) - The time when the URL should
    expire. Accepted values are
@@ -91,6 +96,18 @@ var options = {keypairId: 'APKAJM2FEVTI7BNPCY4A', privateKeyPath: '/foo/bar'}
 var signedRTMPUrlObj = cf.getSignedRTMPUrl('xxxxxxx.cloudfront.net', '/path/to/s3/object', options);
 console.log('RTMP Server Path: ' + signedRTMPUrlObj.rtmpServerPath);
 console.log('Signed Stream Name: ' + signedRTMPUrlObj.rtmpStreamName);
+```
+
+### Creating signed cookies
+```js
+var cf = require('aws-cloudfront-sign')
+var options = {keypairId: 'APKAJM2FEVTI7BNPCY4A', privateKeyPath: '/foo/bar'}
+var signedCookies = cf.getSignedCookies('http://xxxxxxx.cloudfront.net/*', options);
+
+// You can now set cookies in your response header. For example:
+for(var cookieId in signedCookies) {
+ res.cookie(cookieId, signedCookies[cookieId]);
+}
 ```
 
 [moment_docs]: http://momentjs.com/docs
