@@ -223,6 +223,17 @@ describe('CloudfrontUtil', function() {
     });
   });
 
+  describe('#getSignedCookies()', function() {
+    it('should create cookies object', function(done) {
+      var result = CloudfrontUtil.getSignedCookies(
+        'http://foo.com', defaultParams);
+
+      expect(result).to.have.property('CloudFront-Policy');
+      expect(result).to.have.property('CloudFront-Signature');
+      expect(result).to.have.property('CloudFront-Key-Pair-Id');
+      done();
+    });
+  });
   describe('#normalizeBase64()', function() {
     it('should translate illegal characters', function(done) {
       var illegalChars = ['+', '=', '/'];
