@@ -7,6 +7,11 @@
 [darrendao]: https://github.com/darrendao
 [benburkhart1]: https://github.com/benburkhart1
 [dnjohnson]: https://github.com/dnjohnson
+[clarkie]: https://github.com/clarkie
+
+## 2.1.2 (2016-02-26)
+* bugfix: [@clarkie][clarkie]: Fix undeclared variable
+* development: [@jasonsims][jasonsims]: Update jshintrc to error on undeclared variables
 
 ## 2.1.1 (2016-02-24)
 * feature: [@jasonsims][jasonsims]: Added support for NPM tonic examples
