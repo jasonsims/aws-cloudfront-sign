@@ -30,9 +30,13 @@
   },
   "tonicExampleFilename": "./examples/signedURL.js",
   "devDependencies": {
-    "chai": "^2.2.0",
+    "chai": "^3.5.0",
+    "faucet": "0.0.1",
     "mocha": "^2.2.1",
     "moment": "^2.9.0",
-    "sinon": "^1.14.1"
+    "nsp": "^2.2.1",
+    "sinon": "^1.14.1",
+    "tap-spec": "^4.1.1",
+    "tape": "^4.5.1"
   }
 }
