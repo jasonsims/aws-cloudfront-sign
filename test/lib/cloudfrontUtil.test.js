@@ -107,6 +107,15 @@ describe('CloudfrontUtil', function() {
       done();
     });
 
+    it('should fail to accept singe line private key as string', function(done) {
+      var testExpireTime = moment().add(1, 'day').unix() * 1000;
+      var params = _.extend({}, defaultParams);
+      params.privateKeyString = "this_is_a_test_..._a_single_line_string";
+
+      expect(CloudfrontUtil.getSignedUrl.bind('http://foo.com', params)).to.throw(Error);
+      done();
+    });
+
     it('should accept private key as filepath', function(done) {
       var testExpireTime = moment().add(1, 'day').unix() * 1000;
       var params = _.extend({}, defaultParams, {
