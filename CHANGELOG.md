@@ -8,6 +8,12 @@
 [benburkhart1]: https://github.com/benburkhart1
 [dnjohnson]: https://github.com/dnjohnson
 [clarkie]: https://github.com/clarkie
+[caub]: https://github.com/caub
+[joelwass]: https://github.com/joelwass
+
+## 2.2.0 (2016-11-09)
+* development: [@caub][caub]: Simplified expiry and normalization logic
+* development: [@joelwass][joelwass]: Added additional error handling for private key string
 
 ## 2.1.2 (2016-02-26)
 * bugfix: [@clarkie][clarkie]: Fix undeclared variable
