@@ -47,9 +47,8 @@ npm install aws-cloudfront-sign
 * `@return {Object} cookies` - Signed AWS cookies
 
 ### Options
-* `expireTime` (**Optional** - Default: 30s) - The time when the URL should
-   expire. Accepted values are
-   * number - Time in milliseconds (`new Date().getTime() + 30000`)
+* `expireTime` (**Optional** - Default: 1800 sec == 30 min) - The time when the URL should expire. Accepted values are
+   * number - Time in milliseconds (`new Date().getTime() + 1800000`)
    * moment - Valid [momentjs][moment_docs] object (`moment().add(1, 'day')`)
    * Date - Javascript Date object (`new Date(2016, 0, 1)`)
 * `ipRange` (**Optional**) - IP address range allowed to make GET requests
@@ -85,6 +84,7 @@ npm install aws-cloudfront-sign
 
 ## Examples
 ### Creating a signed URL
+By default the URL will expire after half an hour.
 ```js
 var cf = require('aws-cloudfront-sign')
 var options = {keypairId: 'APKAJM2FEVTI7BNPCY4A', privateKeyPath: '/foo/bar'}

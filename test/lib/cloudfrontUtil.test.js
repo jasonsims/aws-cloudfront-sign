@@ -132,12 +132,12 @@ describe('CloudfrontUtil', function() {
       done();
     });
 
-    it('should default `expireTime` to 30 seconds', function(done) {
+    it('should default `expireTime` to 30 minutes (1800 seconds)', function(done) {
       var params = _.extend({}, defaultParams);
       var result = CloudfrontUtil.getSignedUrl('http://foo.com', params);
       var parsedResult = url.parse(result, true);
 
-      expect(parsedResult.query.Expires).to.equal('30');
+      expect(parsedResult.query.Expires).to.equal('1800');
       done();
     });
 
