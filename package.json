@@ -9,6 +9,7 @@
     }
   ],
   "main": "./lib/cloudfrontUtil.js",
+  "types": "./index.d.ts",
   "scripts": {
     "test": "./node_modules/.bin/mocha"
   },
