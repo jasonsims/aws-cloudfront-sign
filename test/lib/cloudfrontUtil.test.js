@@ -273,5 +273,5 @@ function _deserializePolicy(policy) {
     policy = policy.replace(re, actualChar);
   });
 
-  return JSON.parse(new Buffer(policy, 'base64').toString('ascii'));
+  return JSON.parse(Buffer.from(policy, 'base64').toString('ascii'));
 }
