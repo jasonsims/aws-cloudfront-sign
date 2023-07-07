@@ -14,6 +14,7 @@
     "type": "git",
     "url": "https://github.com/jasonsims/aws-cloudfront-sign.git"
   },
+  "funding": "https://ko-fi.com/jzimz",
   "license": "MIT",
   "author": "Jason Sims <sims.jrobert@gmail.com>",
   "contributors": [
@@ -29,10 +30,10 @@
     "build": "npm run build:esm && npm run build:cjs",
     "build:cjs": "tsc --project tsconfig.cjs.json",
     "build:esm": "tsc --project tsconfig.esm.json",
+    "commitlint": "commitlint --edit",
     "lint": "eslint ./src",
-    "test": "jest ./src",
     "prepare": "husky install",
-    "commitlint": "commitlint --edit"
+    "test": "jest ./src"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.6.5",
