@@ -5,6 +5,7 @@
     "preserveConstEnums": true,
     "sourceMap": true,
     "allowJs": true,
+    "esModuleInterop": true,
     "moduleResolution": "Node",
     "declaration": true,
   },

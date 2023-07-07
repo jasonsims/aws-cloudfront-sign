@@ -1,2 +1,2 @@
-export { getSignedUrl, getSignedRTMPUrl, getSignedCookies } from './cloudfront-util'
-export * as CannedPolicy from './canned-policy'
+export { getSignedUrl, getSignedRTMPUrl, getSignedCookies } from './cloudfront-signer';
+export * as CannedPolicy from './canned-policy';

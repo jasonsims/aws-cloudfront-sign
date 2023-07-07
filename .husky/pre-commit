@@ -3,3 +3,4 @@
 
 # TODO: Uncomment this once tests are migrated to jest
 # npm test
+npm run lint
