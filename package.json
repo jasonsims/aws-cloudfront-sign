@@ -30,7 +30,9 @@
     "build:cjs": "tsc --project tsconfig.cjs.json",
     "build:esm": "tsc --project tsconfig.esm.json",
     "lint": "eslint ./src",
-    "test": "jest ./src"
+    "test": "jest ./src",
+    "prepare": "husky install",
+    "commitlint": "commitlint --edit"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.6.5",
@@ -40,7 +42,7 @@
     "@typescript-eslint/parser": "^5.59.7",
     "eslint": "^8.41.0",
     "eslint-config-standard": "^17.1.0",
-    "husky": "^8.0.3",
+    "husky": "^8.0.0",
     "lodash": "^4.17.21",
     "moment": "^2.9.0",
     "ts-jest": "^29.1.0",
