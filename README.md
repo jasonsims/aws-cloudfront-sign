@@ -1,4 +1,4 @@
-AWS CloudFront URL Signature Utility  
+AWS CloudFront URL Signature Utility
 ===================
 [![Build Status](https://travis-ci.org/jasonsims/aws-cloudfront-sign.svg?branch=master)](https://travis-ci.org/jasonsims/aws-cloudfront-sign)
 [![npm version](https://badge.fury.io/js/aws-cloudfront-sign.svg)](http://badge.fury.io/js/aws-cloudfront-sign)
@@ -22,15 +22,26 @@ Generating signed URLs for CloudFront links is a little more tricky than for S3.
 1. Create a CloudFront distribution
 2. Configure your origin with the following settings:
 
-   **Origin Domain Name:** {your-s3-bucket}  
-   **Restrict Bucket Access:** Yes  
-   **Grant Read Permissions on Bucket:** Yes, Update Bucket Policy  
+   **Origin Domain Name:** {your-s3-bucket}
+   **Restrict Bucket Access:** Yes
+   **Grant Read Permissions on Bucket:** Yes, Update Bucket Policy
 3. Create CloudFront Key Pair. [more info][cf_keypair_docs]
 
 ### Installing
 ```sh
 npm install aws-cloudfront-sign
 ```
+
+### TypeScript
+```js
+import { SignatureOptions } from 'aws-cloudfront-sign/types'
+```
+
+### Upgrading from 2.x to 3.x
+* There shouldn't be any breaking changes when coming to 3.x. RTMP URLs were deprecated by Amazon
+but that will affect all versions.
+* Support for ES Modules was added
+* Support for TypeScript was added
 
 ### Upgrading from 1.x to 2.x
 * `expireTime` now takes it's value as milliseconds, Date, or
@@ -42,17 +53,18 @@ npm install aws-cloudfront-sign
 * `@param {Object} options` - URL signature [options](#options)
 * `@return {String} signedUrl` - Signed CloudFrontUrl
 
-#### getSignedRTMPUrl(domainName, s3key, options)
-* `@param {String} domainName` - Domain name of your Cloudfront distribution
-* `@param {String} s3key` - Path to s3 object
-* `@param {Object} options` - URL signature [options](#options)
-* `@return {Object} url.rtmpServerPath` - RTMP formatted server path
-* `@return {Object} url.rtmpStreamName` - Signed RTMP formatted stream name
-
 #### getSignedCookies(url, options)
 * `@param {String} url` - Cloudfront URL to sign
 * `@param {Object} options` - URL signature [options](#options)
 * `@return {Object} cookies` - Signed AWS cookies
+
+#### ~~getSignedRTMPUrl(domainName, s3key, options)~~
+⛔️ **Deprecated**: [RTMP Support Discontinuing on December 31, 2020](https://repost.aws/questions/QUoUZgHZh7SEWlnQUPlBmVNQ/announcement-rtmp-support-discontinuing-on-december-31-2020)
+* ~~`@param {String} domainName` - Domain name of your Cloudfront distribution~~
+* ~~`@param {String} s3key` - Path to s3 object~~
+* ~~`@param {Object} options` - URL signature [options](#options)~~
+* ~~`@return {Object} url.rtmpServerPath` - RTMP formatted server path~~
+* ~~`@return {Object} url.rtmpStreamName` - Signed RTMP formatted stream name~~
 
 ### Options
 * `expireTime` (**Optional** - Default: 1800 sec == 30 min) - The time when the URL should expire. Accepted values are
@@ -69,7 +81,7 @@ npm install aws-cloudfront-sign
   character is also included.
 
   ```js
-  var privateKeyString =
+  const privateKeyString =
     '-----BEGIN RSA PRIVATE KEY-----\n'
     'MIIJKAIBAAKCAgEAwGPMqEvxPYQIffDimM9t3A7Z4aBFAUvLiITzmHRc4UPwryJp\n'
     'EVi3C0sQQKBHlq2IOwrmqNiAk31/uh4FnrRR1mtQm4x4IID58cFAhKkKI/09+j1h\n'
@@ -87,33 +99,26 @@ npm install aws-cloudfront-sign
   CF_PRIVATE_KEY="$(cat your-private-key.pem)"
 
   # Heroku env
-  heroku config:set CF_PRIVATE_KEY="$(cat your-private-key.pem)"  
+  heroku config:set CF_PRIVATE_KEY="$(cat your-private-key.pem)"
   ```
 
 ## Examples
 ### Creating a signed URL
 By default the URL will expire after half an hour.
 ```js
-var cf = require('aws-cloudfront-sign')
-var options = {keypairId: 'APKAJM2FEVTI7BNPCY4A', privateKeyPath: '/foo/bar'}
-var signedUrl = cf.getSignedUrl('http://xxxxxxx.cloudfront.net/path/to/s3/object', options);
+// ESM: import { getSignedUrl } from 'aws-cloudfront-sign'
+const cf = require('aws-cloudfront-sign')
+const options = {keypairId: 'APKAJM2FEVTI7BNPCY4A', privateKeyPath: '/foo/bar'}
+const signedUrl = cf.getSignedUrl('http://xxxxxxx.cloudfront.net/path/to/s3/object', options);
 console.log('Signed URL: ' + signedUrl);
-```
-
-### Creating a signed RTMP URL
-```js
-var cf = require('aws-cloudfront-sign')
-var options = {keypairId: 'APKAJM2FEVTI7BNPCY4A', privateKeyPath: '/foo/bar'}
-var signedRTMPUrlObj = cf.getSignedRTMPUrl('xxxxxxx.cloudfront.net', '/path/to/s3/object', options);
-console.log('RTMP Server Path: ' + signedRTMPUrlObj.rtmpServerPath);
-console.log('Signed Stream Name: ' + signedRTMPUrlObj.rtmpStreamName);
 ```
 
 ### Creating signed cookies
 ```js
-var cf = require('aws-cloudfront-sign')
-var options = {keypairId: 'APKAJM2FEVTI7BNPCY4A', privateKeyPath: '/foo/bar'}
-var signedCookies = cf.getSignedCookies('http://xxxxxxx.cloudfront.net/*', options);
+// ESM: import { getSignedCookies } from 'aws-cloudfront-sign'
+const cf = require('aws-cloudfront-sign')
+const options = {keypairId: 'APKAJM2FEVTI7BNPCY4A', privateKeyPath: '/foo/bar'}
+const signedCookies = cf.getSignedCookies('http://xxxxxxx.cloudfront.net/*', options);
 
 // You can now set cookies in your response header. For example:
 for(var cookieId in signedCookies) {

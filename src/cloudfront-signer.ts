@@ -6,11 +6,6 @@ import { URL } from 'node:url';
 import { SignatureOptions } from './types';
 import { getPrivateKey, createPolicy, createPolicySignature, getExpireTime, getIpRange, normalizeBase64 } from './utils';
 
-interface SignedRtmpUrl {
-  rtmpServerPath: string;
-  rtmpStreamName: string
-}
-
 /**
  * Build an AWS signed URL.
  *
@@ -41,31 +36,14 @@ export function getSignedUrl (cfUrl: string, params: SignatureOptions): string {
 
 /**
  * Build an AWS signed RTMP URL assuming your distribution supports this.
- *
+ * @deprecated
  * @param domainname - Cloudfront domain
  * @param s3key - S3 Key
  * @param params Signature parameters
  * @return Cloudfront server path and stream name with RTMP formatting
  */
-export function getSignedRTMPUrl (domainname: string, s3key: string, params: SignatureOptions): SignedRtmpUrl {
-  if (!domainname || domainname.indexOf('/') > -1) {
-    throw new Error(
-      'Supplied domain name doesn\'t look right. ' +
-      'Example: \'xxxxxxxx.cloudfront.net\'. Omit \'http\' and any paths.'
-    );
-  }
-
-  if (!s3key || s3key.length === 0 || s3key.charAt(0) === '/') {
-    throw new Error(
-      'Supplied s3 key doesn\'t look right. ' +
-      'Example: \'myfolder/bla.mp4\'. Omit preceding slashes or hostnames.'
-    );
-  }
-
-  return {
-    rtmpServerPath: 'rtmp://' + domainname + '/cfx/st',
-    rtmpStreamName: getSignedUrl(s3key, params)
-  };
+export function getSignedRTMPUrl () {
+  throw new Error('Amazon CloudFront has deprecated RTMP distributions. For more information see https://repost.aws/questions/QUoUZgHZh7SEWlnQUPlBmVNQ/announcement-rtmp-support-discontinuing-on-december-31-2020');
 }
 
 /**
