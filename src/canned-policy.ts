@@ -1,22 +1,5 @@
 import { assert } from './utils';
-
-interface PolicyCondition {
-  DateLessThan: {
-    'AWS:EpochTime': number
-  },
-  IpAddress?: {
-    'AWS:SourceIp': string
-  }
-}
-
-interface PolicyStatement {
-  Resource: string;
-  Condition: PolicyCondition;
-}
-
-interface AwsPolicy {
-  Statement: PolicyStatement[]
-}
+import { AwsPolicy } from './types';
 
 export default class CannedPolicy {
   url: string;

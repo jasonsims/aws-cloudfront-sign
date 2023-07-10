@@ -1,81 +1,177 @@
-import { describe, it } from '@jest/globals';
+import { describe, it, beforeEach, afterEach, expect } from '@jest/globals';
+
+import { URL } from 'url';
+import { cwd } from 'process';
+import { join } from 'path';
+import { readFileSync } from 'fs';
+import moment from 'moment';
+import { useFakeTimers, SinonFakeTimers } from 'sinon';
+
+import { getSignedUrl, getSignedCookies } from './cloudfront-signer';
+import { SignatureOptions, AwsPolicy } from './types';
+
+function deserializePolicy (policy: string): AwsPolicy {
+  const safeBase64Chars = { '+': '-', '=': '_', '/': '~' };
+
+  Object.entries(safeBase64Chars).forEach(([actualChar, safeChar]) => {
+    const re = new RegExp('\\' + safeChar, 'g');
+    policy = policy.replace(re, actualChar);
+  });
+
+  return JSON.parse(Buffer.from(policy, 'base64').toString('ascii')) as AwsPolicy;
+}
 
 describe('CloudfrontUtil', function () {
-  // let defaultParams;
-  // let pkey;
-  // let pkeyPath;
-  // let clock;
+  let defaultParams: SignatureOptions;
+  let pkey;
+  let pkeyPath: string;
+  let clock: SinonFakeTimers;
 
   // Setup
   // ------
-  // beforeEach(function () {
-  //   clock = sinon.useFakeTimers();
-  //   pkeyPath = './test/files/dummy.pem';
-  //   pkey = fs.readFileSync(path.join(process.cwd(), pkeyPath));
-  //   defaultParams = {
-  //     keypairId: 'ABC123',
-  //     privateKeyString: pkey.toString('ascii')
-  //   };
+  beforeEach(() => {
+    clock = useFakeTimers();
+    pkeyPath = './test/files/dummy.pem';
+    pkey = readFileSync(join(cwd(), pkeyPath));
+    defaultParams = {
+      keypairId: 'ABC123',
+      privateKeyString: pkey.toString('ascii')
+    };
+  });
 
-  //   done();
-  // });
-
-  // afterEach(function (done) {
-  //   clock.restore();
-  //   done();
-  // });
+  afterEach(() => {
+    clock.restore();
+  });
 
   // Tests
   // ------
   describe('getSignedUrl', function () {
-    it.todo('should accept `expireTime` as a string');
+    it('should accept `expireTime` as a string', () => {
+      const testExpireTime = moment().add(1, 'day').unix() * 1000;
+      const params = Object.assign(defaultParams, {
+        expireTime: testExpireTime.toString()
+      });
+      const result = getSignedUrl('http://foo.com', params);
+      const parsedResult: URL = new URL(result);
+      const expectedResult = (testExpireTime / 1000).toString();
 
-    it.todo('should accept `expireTime` as a number');
+      expect(parsedResult.searchParams.get('Expires')).toBe(expectedResult);
+    });
 
-    it.todo('should accept `expireTime` as a moment');
+    it('should accept `expireTime` as a number', () => {
+      const testExpireTime = moment().add(1, 'day').unix() * 1000;
+      const params = Object.assign(defaultParams, {
+        expireTime: testExpireTime
+      });
+      const result = getSignedUrl('http://foo.com', params);
+      const parsedResult: URL = new URL(result);
+      const expectedResult = (testExpireTime / 1000).toString();
 
-    it.todo('should accept `expireTime` as a Date');
+      expect(parsedResult.searchParams.get('Expires')).toBe(expectedResult);
+    });
 
-    it.todo('should accept private key as string');
+    it('should accept `expireTime` as a moment', () => {
+      const testExpireTime = moment().add(1, 'day');
+      const params = Object.assign(defaultParams, {
+        expireTime: testExpireTime
+      });
+      const result = getSignedUrl('http://foo.com', params);
+      const parsedResult: URL = new URL(result);
+      const expectedResult = testExpireTime.unix().toString();
 
-    it.todo('should fail to accept singe line private key as string');
+      expect(parsedResult.searchParams.get('Expires')).toBe(expectedResult);
+    });
 
-    it.todo('should accept private key as filepath');
+    it('should accept `expireTime` as a Date', () => {
+      const testExpireTime = new Date(new Date().getTime() + 10000);
+      const params = Object.assign(defaultParams, {
+        expireTime: testExpireTime
+      });
+      const result = getSignedUrl('http://foo.com', params);
+      const parsedResult: URL = new URL(result);
+      const expectedResult =
+        Math.round(testExpireTime.getTime() / 1000).toString();
 
-    it.todo('should default `expireTime` to 30 minutes (1800 seconds)');
+      expect(parsedResult.searchParams.get('Expires')).toBe(expectedResult);
+    });
 
-    it.todo('should add base64-encoded `Policy` query param');
+    it('should accept private key as string', () => {
+      const params = Object.assign({}, defaultParams);
+      const result = getSignedUrl('http://foo.com', params);
+      const parsedResult: URL = new URL(result);
 
-    it.todo('should include original query params');
+      expect(parsedResult.searchParams.has('Signature')).toBe(true);
+    });
 
-    it.todo('should return a signed URL');
-  });
+    it('should fail to accept singe line private key as string', () => {
+      const params = Object.assign({}, defaultParams);
+      params.privateKeyString = 'this_is_a_test_..._a_single_line_string';
 
-  describe('getSignedRTMPUrl', function () {
-    // var signedUrlStub;
+      expect(getSignedUrl.bind('http://foo.com', params)).toThrow(Error);
+    });
 
-    // beforeEach(function(done) {
-    //   signedUrlStub = sinon.stub(CloudfrontUtil, 'getSignedUrl', _.noop);
-    //   done();
-    // });
+    it('should accept private key as filepath', () => {
+      const params = Object.assign({}, defaultParams, {
+        privateKeyPath: join(cwd(), pkeyPath)
+      });
+      delete params.privateKeyString;
 
-    // afterEach(function(done) {
-    //   signedUrlStub.restore();
-    //   done();
-    // });
+      const result = getSignedUrl('http://foo.com', params);
+      const parsedResult: URL = new URL(result);
 
-    it.todo('should return RTMP object');
+      expect(parsedResult.searchParams.has('Signature')).toBe(true);
+    });
 
-    it.todo('should fail if `domainname` is missing');
+    it('should default `expireTime` to 30 minutes (1800 seconds)', () => {
+      const params = Object.assign({}, defaultParams);
+      const result = getSignedUrl('http://foo.com', params);
+      const parsedResult: URL = new URL(result);
 
-    it.todo('should fail if `domainname` is invalid');
+      expect(parsedResult.searchParams.get('Expires')).toBe('1800');
+    });
 
-    it.todo('should fail if `s3key` is missing');
+    it('should add base64-encoded `Policy` query param', () => {
+      const params = Object.assign({}, defaultParams);
+      const result = getSignedUrl('http://foo.com', params);
+      const parsedResult: URL = new URL(result);
+      const policy = deserializePolicy(parsedResult.searchParams.get('Policy'));
 
-    it.todo('should fail if `s3key` is invalid');
+      expect(policy).toHaveProperty('Statement');
+      expect(policy.Statement[0]).toHaveProperty('Resource');
+      expect(policy.Statement[0].Resource).toBe('http://foo.com');
+    });
+
+    it('should include original query params', () => {
+      const params = Object.assign({}, defaultParams);
+      const result = getSignedUrl('http://foo.com?test=true', params);
+      const parsedResult: URL = new URL(result);
+
+      expect(parsedResult.searchParams.has('test')).toBe(true);
+      expect(parsedResult.searchParams.has('Expires')).toBe(true);
+      expect(parsedResult.searchParams.has('Signature')).toBe(true);
+      expect(parsedResult.searchParams.has('Key-Pair-Id')).toBe(true);
+      expect(parsedResult.searchParams.has('Policy')).toBe(true);
+    });
+
+    it('should return a signed URL', () => {
+      const params = Object.assign({}, defaultParams);
+      const result = getSignedUrl('http://foo.com', params);
+      const parsedResult: URL = new URL(result);
+
+      expect(parsedResult.searchParams.has('Expires')).toBe(true);
+      expect(parsedResult.searchParams.has('Signature')).toBe(true);
+      expect(parsedResult.searchParams.has('Key-Pair-Id')).toBe(true);
+      expect(parsedResult.searchParams.has('Policy')).toBe(true);
+    });
   });
 
   describe('getSignedCookies', function () {
-    it.todo('should create cookies object');
+    it('should create cookies object', () => {
+      const result = getSignedCookies('http://foo.com', defaultParams);
+
+      expect(result).toHaveProperty('CloudFront-Policy');
+      expect(result).toHaveProperty('CloudFront-Signature');
+      expect(result).toHaveProperty('CloudFront-Key-Pair-Id');
+    });
   });
 });
