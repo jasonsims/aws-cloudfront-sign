@@ -1,38 +1,58 @@
 {
   "name": "aws-cloudfront-sign",
-  "version": "2.2.1",
+  "version": "3.0.0",
   "description": "Utility module for signing AWS CloudFront URLs",
+  "keywords": [
+    "aws",
+    "CloudFront",
+    "signed URL"
+  ],
+  "bugs": {
+    "url": "https://github.com/jasonsims/aws-cloudfront-sign/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jasonsims/aws-cloudfront-sign.git"
+  },
+  "funding": "https://ko-fi.com/jzimz",
+  "license": "MIT",
   "author": "Jason Sims <sims.jrobert@gmail.com>",
   "contributors": [
     {
       "name": "Matt Palmerlee"
     }
   ],
-  "main": "./lib/cloudfrontUtil.js",
-  "scripts": {
-    "test": "./node_modules/.bin/mocha"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jasonsims/aws-cloudfront-sign.git"
-  },
-  "keywords": [
-    "aws",
-    "CloudFront",
-    "signed URL"
+  "main": "./dist/cjs/index.js",
+  "files": [
+    "/dist"
   ],
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/jasonsims/aws-cloudfront-sign/issues"
+  "scripts": {
+    "build": "npm run build:esm && npm run build:cjs",
+    "build:cjs": "tsc --project tsconfig.cjs.json",
+    "build:esm": "tsc --project tsconfig.esm.json",
+    "commitlint": "commitlint --edit",
+    "lint": "eslint ./src",
+    "prepare": "husky install",
+    "test": "jest ./src"
   },
-  "dependencies": {
-    "lodash": "^4.17.21"
-  },
-  "tonicExampleFilename": "./examples/signedURL.js",
   "devDependencies": {
-    "chai": "^2.2.0",
-    "mocha": "^2.2.1",
+    "@commitlint/cli": "^17.6.5",
+    "@commitlint/config-conventional": "^17.6.5",
+    "@jest/globals": "^29.5.0",
+    "@types/node": "^20.4.0",
+    "@types/sinon": "^10.0.15",
+    "@typescript-eslint/eslint-plugin": "^5.59.7",
+    "@typescript-eslint/parser": "^5.59.7",
+    "eslint": "^8.41.0",
+    "eslint-config-semistandard": "^17.0.0",
+    "husky": "^8.0.0",
     "moment": "^2.9.0",
-    "sinon": "^1.14.1"
-  }
+    "sinon": "^15.2.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.0.4"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "tonicExampleFilename": "./examples/signedURL.js"
 }
