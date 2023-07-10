@@ -15,7 +15,7 @@ Generating signed URLs for CloudFront links is a little more tricky than for S3.
 
 ## Usage
 ### Requirements
-* Node.js >=0.10.0
+* Node.js >=18
 * Active CloudFront distribution with origin configured
 
 ### Configuring CloudFront

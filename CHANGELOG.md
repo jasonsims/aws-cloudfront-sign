@@ -11,6 +11,16 @@
 [caub]: https://github.com/caub
 [joelwass]: https://github.com/joelwass
 
+## 3.0.0 (2023-07-10)
+* feature: added support for TypeScript
+* feature: added support for ES Modules
+* development: engines updated to current LTS (v18)
+* development: added commit lint
+* development: migrated test suite to jest
+* development: added funding URL
+* development: removed lodash dependency
+* development: added .nvmrc
+
 ## 2.2.0 (2016-11-09)
 * development: [@caub][caub]: Simplified expiry and normalization logic
 * development: [@joelwass][joelwass]: Added additional error handling for private key string
