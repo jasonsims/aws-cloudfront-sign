@@ -35,6 +35,7 @@
     "lint": "eslint ./src",
     "prepare": "husky install",
     "prepublishOnly": "npm run build",
+    "release": "np",
     "test": "jest ./src"
   },
   "devDependencies": {
@@ -49,6 +50,7 @@
     "eslint-config-semistandard": "^17.0.0",
     "husky": "^8.0.0",
     "moment": "^2.9.0",
+    "np": "^8.0.4",
     "rimraf": "^5.0.1",
     "sinon": "^15.2.0",
     "ts-jest": "^29.1.0",
