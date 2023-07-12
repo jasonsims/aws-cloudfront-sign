@@ -1,6 +1,6 @@
 {
   "name": "aws-cloudfront-sign",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Utility module for signing AWS CloudFront URLs",
   "keywords": [
     "aws",
