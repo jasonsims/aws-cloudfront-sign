@@ -11,7 +11,9 @@
 [caub]: https://github.com/caub
 [joelwass]: https://github.com/joelwass
 
-## 3.0.1 (2023-07-12)
+## 3.0.2
+* bugfix: fix empty package
+## ~~3.0.1 (2023-07-12)~~ deprecated
 * bugfix: remove leftover debug log [#73](https://github.com/jasonsims/aws-cloudfront-sign/issues/73)
 ## 3.0.0 (2023-07-10)
 * feature: added support for TypeScript
