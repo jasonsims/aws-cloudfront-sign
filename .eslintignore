@@ -1,5 +1,5 @@
 dist
-jest.config.js
 .eslintrc.cjs
 commitlint.config.js
 lib
+vitest.config.ts

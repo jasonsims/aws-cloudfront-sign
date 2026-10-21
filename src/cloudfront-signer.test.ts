@@ -1,11 +1,10 @@
-import { describe, it, beforeEach, afterEach, expect } from '@jest/globals';
+import { describe, it, beforeEach, afterEach, expect, vi } from 'vitest';
 
 import { URL } from 'url';
 import { cwd } from 'process';
 import { join } from 'path';
 import { readFileSync } from 'fs';
 import moment from 'moment';
-import { useFakeTimers, SinonFakeTimers } from 'sinon';
 
 import { getSignedUrl, getSignedCookies } from './cloudfront-signer';
 import { SignatureOptions, AwsPolicy } from './types';
@@ -25,12 +24,16 @@ describe('CloudfrontUtil', function () {
   let defaultParams: SignatureOptions;
   let pkey;
   let pkeyPath: string;
-  let clock: SinonFakeTimers;
+
+  // Freeze time so expiry values are deterministic.
+  const now = new Date('2024-01-01T00:00:00Z');
+  const nowSecs = now.getTime() / 1000;
 
   // Setup
   // ------
   beforeEach(() => {
-    clock = useFakeTimers();
+    vi.useFakeTimers();
+    vi.setSystemTime(now);
     pkeyPath = './test/files/dummy.pem';
     pkey = readFileSync(join(cwd(), pkeyPath));
     defaultParams = {
@@ -40,7 +43,7 @@ describe('CloudfrontUtil', function () {
   });
 
   afterEach(() => {
-    clock.restore();
+    vi.useRealTimers();
   });
 
   // Tests
@@ -48,7 +51,7 @@ describe('CloudfrontUtil', function () {
   describe('getSignedUrl', function () {
     it('should accept `expireTime` as a string', () => {
       const testExpireTime = moment().add(1, 'day').unix() * 1000;
-      const params = Object.assign(defaultParams, {
+      const params = Object.assign({}, defaultParams, {
         expireTime: testExpireTime.toString()
       });
       const result = getSignedUrl('http://foo.com', params);
@@ -60,7 +63,7 @@ describe('CloudfrontUtil', function () {
 
     it('should accept `expireTime` as a number', () => {
       const testExpireTime = moment().add(1, 'day').unix() * 1000;
-      const params = Object.assign(defaultParams, {
+      const params = Object.assign({}, defaultParams, {
         expireTime: testExpireTime
       });
       const result = getSignedUrl('http://foo.com', params);
@@ -72,7 +75,7 @@ describe('CloudfrontUtil', function () {
 
     it('should accept `expireTime` as a moment', () => {
       const testExpireTime = moment().add(1, 'day');
-      const params = Object.assign(defaultParams, {
+      const params = Object.assign({}, defaultParams, {
         expireTime: testExpireTime
       });
       const result = getSignedUrl('http://foo.com', params);
@@ -84,7 +87,7 @@ describe('CloudfrontUtil', function () {
 
     it('should accept `expireTime` as a Date', () => {
       const testExpireTime = new Date(new Date().getTime() + 10000);
-      const params = Object.assign(defaultParams, {
+      const params = Object.assign({}, defaultParams, {
         expireTime: testExpireTime
       });
       const result = getSignedUrl('http://foo.com', params);
@@ -103,11 +106,13 @@ describe('CloudfrontUtil', function () {
       expect(parsedResult.searchParams.has('Signature')).toBe(true);
     });
 
-    it('should fail to accept singe line private key as string', () => {
-      const params = Object.assign({}, defaultParams);
-      params.privateKeyString = 'this_is_a_test_..._a_single_line_string';
+    it('should fail to accept single line private key as string', () => {
+      const params = Object.assign({}, defaultParams, {
+        privateKeyString: 'this_is_a_test_..._a_single_line_string'
+      });
 
-      expect(getSignedUrl.bind('http://foo.com', params)).toThrow(Error);
+      expect(() => getSignedUrl('http://foo.com', params))
+        .toThrow(/must include line breaks/);
     });
 
     it('should accept private key as filepath', () => {
@@ -127,7 +132,7 @@ describe('CloudfrontUtil', function () {
       const result = getSignedUrl('http://foo.com', params);
       const parsedResult: URL = new URL(result);
 
-      expect(parsedResult.searchParams.get('Expires')).toBe('1800');
+      expect(parsedResult.searchParams.get('Expires')).toBe(`${nowSecs + 1800}`);
     });
 
     it('should add base64-encoded `Policy` query param', () => {
@@ -171,7 +176,10 @@ describe('CloudfrontUtil', function () {
 
       expect(result).toHaveProperty('CloudFront-Policy');
       expect(result).toHaveProperty('CloudFront-Signature');
-      expect(result).toHaveProperty('CloudFront-Key-Pair-Id');
+      expect(result).toHaveProperty('CloudFront-Key-Pair-Id', 'ABC123');
+
+      const policy = deserializePolicy(result['CloudFront-Policy']);
+      expect(policy.Statement[0].Resource).toBe('http://foo.com');
     });
   });
 });
