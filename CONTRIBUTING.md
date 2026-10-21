@@ -8,10 +8,13 @@ Thanks for helping improve `aws-cloudfront-sign`!
 npm install
 ```
 
-Installing dependencies also installs the [husky](https://typicode.github.io/husky/) Git hooks:
+Installing dependencies also points Git at the hooks in `.githooks/` (via
+`git config core.hooksPath .githooks`):
 
-- `pre-commit` runs `npm run lint` and `npm test`
+- `pre-commit` runs lint, format check, typecheck and tests
 - `commit-msg` checks your message with [commitlint](https://commitlint.js.org/)
+
+Skip them for a single commit with `git commit --no-verify`; CI runs the same checks.
 
 Development tooling requires Node.js 22.12 or newer.
 
