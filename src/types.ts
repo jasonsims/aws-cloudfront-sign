@@ -3,16 +3,16 @@ export interface SignatureOptions {
   expireTime?: number;
   ipRange?: string;
   privateKeyString?: string;
-  privateKeyPath?: string
+  privateKeyPath?: string;
 }
 
 export interface PolicyCondition {
   DateLessThan: {
-    'AWS:EpochTime': number
-  },
+    'AWS:EpochTime': number;
+  };
   IpAddress?: {
-    'AWS:SourceIp': string
-  }
+    'AWS:SourceIp': string;
+  };
 }
 
 export interface PolicyStatement {
@@ -21,5 +21,5 @@ export interface PolicyStatement {
 }
 
 export interface AwsPolicy {
-  Statement: PolicyStatement[]
+  Statement: PolicyStatement[];
 }
