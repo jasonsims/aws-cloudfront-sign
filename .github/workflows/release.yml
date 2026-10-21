@@ -1,0 +1,78 @@
+# Publishes the package to npm when a GitHub release is published.
+#
+# Uses npm trusted publishing (OIDC), so no NPM_TOKEN secret is needed and
+# provenance attestations are generated automatically. See RELEASING.md.
+#
+# One-time setup on npmjs.com (package maintainer):
+#   1. Open https://www.npmjs.com/package/aws-cloudfront-sign/access
+#   2. Under "Trusted Publisher", choose "GitHub Actions" and enter:
+#        Organization or user: jasonsims
+#        Repository:           aws-cloudfront-sign
+#        Workflow filename:    release.yml
+#        Environment:          (leave empty)
+#   3. Optionally, set "Publishing access" to require 2FA and disallow tokens,
+#      so trusted publishing is the only way to publish.
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # required for npm trusted publishing (OIDC) + provenance
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # No dependency cache here on purpose: a release build should not
+      # restore a cache that other workflows could have written.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - name: Ensure npm supports trusted publishing (>= 11.5.1)
+        run: |
+          current="$(npm --version)"
+          echo "npm $current"
+          if ! node -e '
+            const [maj, min, pat] = process.argv[1].split(".").map(Number);
+            process.exit(maj > 11 || (maj === 11 && (min > 5 || (min === 5 && pat >= 1))) ? 0 : 1);
+          ' "$current"; then
+            npm install -g "npm@^11.5.1"
+            echo "upgraded to npm $(npm --version)"
+          fi
+
+      - name: Verify release tag matches package.json version
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          pkg_version="$(node -p 'require("./package.json").version')"
+          if [ "${RELEASE_TAG#v}" != "$pkg_version" ]; then
+            echo "::error::Release tag '$RELEASE_TAG' does not match package.json version '$pkg_version'"
+            exit 1
+          fi
+          echo "Tag $RELEASE_TAG matches package.json version $pkg_version"
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npm run check:package
+
+      - name: Publish
+        run: npm publish --provenance --access public

@@ -1,7 +1,7 @@
 AWS CloudFront URL Signature Utility
 ===================
-[![Build Status](https://travis-ci.org/jasonsims/aws-cloudfront-sign.svg?branch=master)](https://travis-ci.org/jasonsims/aws-cloudfront-sign)
-[![npm version](https://badge.fury.io/js/aws-cloudfront-sign.svg)](http://badge.fury.io/js/aws-cloudfront-sign)
+[![CI](https://github.com/jasonsims/aws-cloudfront-sign/actions/workflows/ci.yml/badge.svg)](https://github.com/jasonsims/aws-cloudfront-sign/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/aws-cloudfront-sign)](https://www.npmjs.com/package/aws-cloudfront-sign)
 
 ---
 

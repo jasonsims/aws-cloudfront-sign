@@ -57,7 +57,6 @@
     "lint:fix": "eslint . --fix",
     "prepare": "husky",
     "prepublishOnly": "npm run build",
-    "release": "np",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit -p tsconfig.json"
@@ -73,7 +72,6 @@
     "globals": "^17.13.0",
     "husky": "^9.1.7",
     "moment": "^2.31.0",
-    "np": "^8.0.4",
     "prettier": "^3.9.10",
     "publint": "^0.3.25",
     "rimraf": "^6.1.3",
