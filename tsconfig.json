@@ -1,4 +1,10 @@
 {
   "extends": "./tsconfig.cjs.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true
+  },
+  "include": ["src/**/*", "vitest.config.ts"],
   "exclude": []
 }

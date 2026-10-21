@@ -1,5 +1,0 @@
-dist
-.eslintrc.cjs
-commitlint.config.js
-lib
-vitest.config.ts
