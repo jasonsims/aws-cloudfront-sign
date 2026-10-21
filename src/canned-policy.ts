@@ -1,5 +1,5 @@
-import { assert } from './utils';
-import { AwsPolicy } from './types';
+import { assert } from './utils.js';
+import { AwsPolicy } from './types.js';
 
 export default class CannedPolicy {
   url: string;

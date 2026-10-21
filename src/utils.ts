@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { createSign } from 'crypto';
-import CannedPolicy from './canned-policy';
-import { SignatureOptions } from './types';
+import CannedPolicy from './canned-policy.js';
+import { SignatureOptions } from './types.js';
 
 /**
  * Create a URL safe Base64 encoded string.
