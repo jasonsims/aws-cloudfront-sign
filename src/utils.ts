@@ -38,9 +38,14 @@ export function createPolicy(
 export function createPolicySignature(
   policy: CannedPolicy,
   privateKey: string,
+  passphrase?: string,
 ): string {
   const sign = createSign('RSA-SHA1');
   sign.update(policy.toJSON());
+
+  if (typeof passphrase === 'string') {
+    return sign.sign({ key: privateKey, passphrase }, 'base64');
+  }
 
   return sign.sign(privateKey, 'base64');
 }

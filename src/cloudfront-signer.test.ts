@@ -1,30 +1,57 @@
-import { describe, it, beforeEach, afterEach, expect, vi } from 'vitest';
+import {
+  describe,
+  it,
+  beforeAll,
+  beforeEach,
+  afterEach,
+  expect,
+  vi,
+} from 'vitest';
 
 import { URL } from 'url';
 import { cwd } from 'process';
 import { join } from 'path';
 import { readFileSync } from 'fs';
+import { createPublicKey, generateKeyPairSync, verify } from 'crypto';
 import moment from 'moment';
 
 import { getSignedUrl, getSignedCookies } from './cloudfront-signer';
 import { SignatureOptions, AwsPolicy } from './types';
 
-function deserializePolicy(policy: string): AwsPolicy {
+// Reverse `normalizeBase64` and decode to raw bytes.
+function denormalizeBase64(str: string): Buffer {
   const safeBase64Chars = { '+': '-', '=': '_', '/': '~' };
 
   Object.entries(safeBase64Chars).forEach(([actualChar, safeChar]) => {
     const re = new RegExp('\\' + safeChar, 'g');
-    policy = policy.replace(re, actualChar);
+    str = str.replace(re, actualChar);
   });
 
-  return JSON.parse(
-    Buffer.from(policy, 'base64').toString('ascii'),
-  ) as AwsPolicy;
+  return Buffer.from(str, 'base64');
+}
+
+function deserializePolicy(policy: string): AwsPolicy {
+  return JSON.parse(denormalizeBase64(policy).toString('ascii')) as AwsPolicy;
+}
+
+// Cryptographically verify a normalized CloudFront signature over a
+// normalized policy using the given public key.
+function verifySignature(
+  policy: string,
+  signature: string,
+  publicKey: Parameters<typeof verify>[2],
+): boolean {
+  return verify(
+    'RSA-SHA1',
+    denormalizeBase64(policy),
+    publicKey,
+    denormalizeBase64(signature),
+  );
 }
 
 describe('CloudfrontUtil', function () {
   let defaultParams: SignatureOptions;
-  let pkey;
+  let pkey: Buffer;
   let pkeyPath: string;
 
   // Freeze time so expiry values are deterministic.
@@ -53,9 +80,10 @@ describe('CloudfrontUtil', function () {
   describe('getSignedUrl', function () {
     it('should accept `expireTime` as a string', () => {
       const testExpireTime = moment().add(1, 'day').unix() * 1000;
-      const params = Object.assign({}, defaultParams, {
+      const params: SignatureOptions = {
+        ...defaultParams,
         expireTime: testExpireTime.toString(),
-      });
+      };
       const result = getSignedUrl('http://foo.com', params);
       const parsedResult: URL = new URL(result);
       const expectedResult = (testExpireTime / 1000).toString();
@@ -65,9 +93,10 @@ describe('CloudfrontUtil', function () {
 
     it('should accept `expireTime` as a number', () => {
       const testExpireTime = moment().add(1, 'day').unix() * 1000;
-      const params = Object.assign({}, defaultParams, {
+      const params: SignatureOptions = {
+        ...defaultParams,
         expireTime: testExpireTime,
-      });
+      };
       const result = getSignedUrl('http://foo.com', params);
       const parsedResult: URL = new URL(result);
       const expectedResult = (testExpireTime / 1000).toString();
@@ -77,9 +106,10 @@ describe('CloudfrontUtil', function () {
 
     it('should accept `expireTime` as a moment', () => {
       const testExpireTime = moment().add(1, 'day');
-      const params = Object.assign({}, defaultParams, {
+      const params: SignatureOptions = {
+        ...defaultParams,
         expireTime: testExpireTime,
-      });
+      };
       const result = getSignedUrl('http://foo.com', params);
       const parsedResult: URL = new URL(result);
       const expectedResult = testExpireTime.unix().toString();
@@ -89,9 +119,10 @@ describe('CloudfrontUtil', function () {
 
     it('should accept `expireTime` as a Date', () => {
       const testExpireTime = new Date(new Date().getTime() + 10000);
-      const params = Object.assign({}, defaultParams, {
+      const params: SignatureOptions = {
+        ...defaultParams,
         expireTime: testExpireTime,
-      });
+      };
       const result = getSignedUrl('http://foo.com', params);
       const parsedResult: URL = new URL(result);
       const expectedResult = Math.round(
@@ -107,6 +138,19 @@ describe('CloudfrontUtil', function () {
       const parsedResult: URL = new URL(result);
 
       expect(parsedResult.searchParams.has('Signature')).toBe(true);
+    });
+
+    it('should produce a signature verifiable with the public key', () => {
+      const result = getSignedUrl('http://foo.com', defaultParams);
+      const parsedResult: URL = new URL(result);
+
+      expect(
+        verifySignature(
+          parsedResult.searchParams.get('Policy'),
+          parsedResult.searchParams.get('Signature'),
+          createPublicKey(pkey),
+        ),
+      ).toBe(true);
     });
 
     it('should fail to accept single line private key as string', () => {
@@ -173,6 +217,90 @@ describe('CloudfrontUtil', function () {
       expect(parsedResult.searchParams.has('Signature')).toBe(true);
       expect(parsedResult.searchParams.has('Key-Pair-Id')).toBe(true);
       expect(parsedResult.searchParams.has('Policy')).toBe(true);
+    });
+  });
+
+  describe('passphrase-protected private keys', function () {
+    const passphrase = 'correct horse battery staple';
+    let encryptedKey: string;
+    let publicKey: string;
+
+    beforeAll(() => {
+      const keyPair = generateKeyPairSync('rsa', {
+        modulusLength: 2048,
+        publicKeyEncoding: { type: 'spki', format: 'pem' },
+        privateKeyEncoding: {
+          type: 'pkcs8',
+          format: 'pem',
+          cipher: 'aes-256-cbc',
+          passphrase,
+        },
+      });
+      encryptedKey = keyPair.privateKey;
+      publicKey = keyPair.publicKey;
+    });
+
+    it('should sign a URL with the correct passphrase', () => {
+      const params: SignatureOptions = {
+        keypairId: 'ABC123',
+        privateKeyString: encryptedKey,
+        privateKeyPassphrase: passphrase,
+      };
+      const result = getSignedUrl('http://foo.com', params);
+      const parsedResult: URL = new URL(result);
+
+      expect(
+        verifySignature(
+          parsedResult.searchParams.get('Policy'),
+          parsedResult.searchParams.get('Signature'),
+          publicKey,
+        ),
+      ).toBe(true);
+    });
+
+    it('should sign cookies with the correct passphrase', () => {
+      const result = getSignedCookies('http://foo.com', {
+        keypairId: 'ABC123',
+        privateKeyString: encryptedKey,
+        privateKeyPassphrase: passphrase,
+      });
+
+      expect(
+        verifySignature(
+          result['CloudFront-Policy'],
+          result['CloudFront-Signature'],
+          publicKey,
+        ),
+      ).toBe(true);
+    });
+
+    it('should throw with a wrong passphrase', () => {
+      expect(() =>
+        getSignedUrl('http://foo.com', {
+          keypairId: 'ABC123',
+          privateKeyString: encryptedKey,
+          privateKeyPassphrase: 'wrong passphrase',
+        }),
+      ).toThrow();
+    });
+
+    it('should throw when the passphrase is missing', () => {
+      expect(() =>
+        getSignedUrl('http://foo.com', {
+          keypairId: 'ABC123',
+          privateKeyString: encryptedKey,
+        }),
+      ).toThrow();
+    });
+
+    it('should still reject a single line encrypted key', () => {
+      expect(() =>
+        getSignedUrl('http://foo.com', {
+          keypairId: 'ABC123',
+          privateKeyString: encryptedKey.replace(/\r?\n/g, ''),
+          privateKeyPassphrase: passphrase,
+        }),
+      ).toThrow(/must include line breaks/);
     });
   });
 
