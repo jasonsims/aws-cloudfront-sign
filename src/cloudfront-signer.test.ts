@@ -82,7 +82,7 @@ describe('CloudfrontUtil', function () {
       const testExpireTime = moment().add(1, 'day').unix() * 1000;
       const params: SignatureOptions = {
         ...defaultParams,
-        expireTime: testExpireTime.toString(),
+        expireTime: `${testExpireTime}`,
       };
       const result = getSignedUrl('http://foo.com', params);
       const parsedResult: URL = new URL(result);
@@ -151,6 +151,24 @@ describe('CloudfrontUtil', function () {
           createPublicKey(pkey),
         ),
       ).toBe(true);
+    });
+
+    it('should not accept non-numeric `expireTime` strings', () => {
+      const params: SignatureOptions = {
+        ...defaultParams,
+        // @ts-expect-error date strings are not parsed; only numeric strings are accepted
+        expireTime: '2030-01-01',
+      };
+
+      expect(params.expireTime).toBe('2030-01-01');
+    });
+
+    it('should fail with a clear error when no private key is given', () => {
+      const params: SignatureOptions = { keypairId: 'ABC123' };
+
+      expect(() => getSignedUrl('http://foo.com', params)).toThrow(
+        /missing param: privateKeyString or privateKeyPath/i,
+      );
     });
 
     it('should fail to accept single line private key as string', () => {

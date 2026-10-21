@@ -4,9 +4,10 @@
  * Any value that converts to a millisecond Unix timestamp via unary `+` is
  * accepted: a number of milliseconds, a numeric string of milliseconds, a
  * `Date`, or any object with a numeric `valueOf()` (for example a moment.js or
- * Luxon instance).
+ * Luxon instance). Strings must be numeric: date strings such as
+ * `'2030-01-01'` are not parsed.
  */
-export type ExpireTime = number | string | Date | { valueOf(): number };
+export type ExpireTime = number | `${number}` | Date | { valueOf(): number };
 
 /**
  * Options used to sign a CloudFront URL or generate signed cookies.
