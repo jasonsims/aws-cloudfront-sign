@@ -16,6 +16,8 @@
 * feature: public types (`SignatureOptions`, `ExpireTime`) are exported from the package entry, and the `aws-cloudfront-sign/types` subpath now resolves
 * feature: added `privateKeyPassphrase` option for encrypted private keys [#60](https://github.com/jasonsims/aws-cloudfront-sign/issues/60)
 * bugfix: `expireTime` type now accepts a number (ms), numeric string, `Date`, or any object with `valueOf()` (e.g. moment, dayjs)
+* bugfix: a missing private key now throws `Missing param: privateKeyString or privateKeyPath`
+* note: an `exports` map now restricts imports to the package entry, `aws-cloudfront-sign/types` and `aws-cloudfront-sign/dist/*`; deep imports into `dist/` must include the file extension
 * development: migrated test suite to Vitest
 * development: migrated to ESLint flat config and added Prettier
 * development: added GitHub Actions CI and npm publishing with provenance

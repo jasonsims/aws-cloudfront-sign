@@ -53,7 +53,7 @@ const signedUrl = getSignedUrl('https://d111111abcdef8.cloudfront.net/path/to/ob
 ```
 
 ### Upgrading from 3.0 to 3.1
-There are no breaking changes.
+There are no breaking changes to the public API.
 * ES Modules now work: `import { getSignedUrl } from 'aws-cloudfront-sign'` loads a native ESM
   build (the ESM build in 3.0.x was not reachable). `import cf from 'aws-cloudfront-sign'` also
   works. CommonJS (`require`) is unchanged.
@@ -61,6 +61,12 @@ There are no breaking changes.
   `aws-cloudfront-sign/types` works too.
 * The `expireTime` type now matches what the runtime accepts (see [options](#options)).
 * New `privateKeyPassphrase` option for encrypted private keys.
+* Calling without `privateKeyString` or `privateKeyPath` now throws a
+  `Missing param` error instead of a misleading line-break error.
+* The package now declares an `exports` map. Importing internal files under
+  `dist/` is not part of the public API; if you do, the path must now include the
+  file extension (e.g. `aws-cloudfront-sign/dist/cjs/utils.js`, not
+  `aws-cloudfront-sign/dist/cjs/utils`).
 
 ### Upgrading from 2.x to 3.x
 * There shouldn't be any breaking changes when coming to 3.x. RTMP URLs were deprecated by Amazon
