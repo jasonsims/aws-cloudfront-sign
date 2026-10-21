@@ -81,6 +81,5 @@
   },
   "engines": {
     "node": ">=18"
-  },
-  "tonicExampleFilename": "./examples/signedURL.js"
+  }
 }

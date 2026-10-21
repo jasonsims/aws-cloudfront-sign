@@ -11,7 +11,20 @@
 [caub]: https://github.com/caub
 [joelwass]: https://github.com/joelwass
 
-## 3.0.2
+## 3.1.0 (Unreleased)
+* feature: ES Modules now work (`import { getSignedUrl } from 'aws-cloudfront-sign'`); the 3.0.x ESM build was unreachable. A default export is also provided. CommonJS is unchanged
+* feature: public types (`SignatureOptions`, `ExpireTime`) are exported from the package entry, and the `aws-cloudfront-sign/types` subpath now resolves
+* feature: added `privateKeyPassphrase` option for encrypted private keys [#60](https://github.com/jasonsims/aws-cloudfront-sign/issues/60)
+* bugfix: `expireTime` type now accepts a number (ms), numeric string, `Date`, or any object with `valueOf()` (e.g. moment, dayjs)
+* development: migrated test suite to Vitest
+* development: migrated to ESLint flat config and added Prettier
+* development: added GitHub Actions CI and npm publishing with provenance
+* development: enforce conventional commits on pull requests
+* development: added Dependabot
+* development: refreshed README (trusted key groups, Origin Access Control, ESM/CommonJS examples) and examples
+* development: removed obsolete RunKit `tonicExampleFilename` from package.json
+
+## 3.0.2 (2023-07-12)
 * bugfix: fix empty package
 ## ~~3.0.1 (2023-07-12)~~ deprecated
 * bugfix: remove leftover debug log [#73](https://github.com/jasonsims/aws-cloudfront-sign/issues/73)
