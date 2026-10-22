@@ -1,4 +1,4 @@
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from 'vitest';
 import CannedPolicy from './canned-policy';
 import { AwsPolicy } from './types';
 
@@ -40,12 +40,19 @@ describe('CannedPolicy', function () {
     });
     it('should support IP restrictions', () => {
       const expireTimeMs = new Date().getTime() + 10000;
-      const policy = new CannedPolicy('http://t.com', expireTimeMs, '1.2.3.0/24');
+      const policy = new CannedPolicy(
+        'http://t.com',
+        expireTimeMs,
+        '1.2.3.0/24',
+      );
       const result = policy.toJSON();
       // Parse the stringified result so we can examine it's properties.
       const parsedResult = JSON.parse(result) as AwsPolicy;
 
-      expect(parsedResult).toHaveProperty('Statement[0].Condition.IpAddress.AWS:SourceIp', '1.2.3.0/24');
+      expect(parsedResult).toHaveProperty(
+        'Statement[0].Condition.IpAddress.AWS:SourceIp',
+        '1.2.3.0/24',
+      );
     });
     it('should exclude IP restrictions if none were given', () => {
       const policy = new CannedPolicy('http://t.com', Date.now() + 1000);
@@ -53,7 +60,10 @@ describe('CannedPolicy', function () {
       // Parse the stringified result so we can examine it's properties.
       const parsedResult = JSON.parse(result) as AwsPolicy;
 
-      expect(parsedResult).not.toHaveProperty('Statement[0].Condition.IpAddress.AWS:SourceIp');
+      expect(parsedResult).toHaveProperty('Statement[0].Condition');
+      expect(parsedResult).not.toHaveProperty(
+        'Statement[0].Condition.IpAddress',
+      );
     });
     it('should return the canned policy as stringified JSON', () => {
       const expireTimeMs = new Date().getTime() + 10000;
@@ -63,8 +73,14 @@ describe('CannedPolicy', function () {
       // Parse the stringified result so we can examine it's properties.
       const parsedResult = JSON.parse(result) as AwsPolicy;
 
-      expect(parsedResult).toHaveProperty('Statement[0].Resource', 'http://t.com');
-      expect(parsedResult).toHaveProperty('Statement[0].Condition.DateLessThan.AWS:EpochTime', expireTimeSecs);
+      expect(parsedResult).toHaveProperty(
+        'Statement[0].Resource',
+        'http://t.com',
+      );
+      expect(parsedResult).toHaveProperty(
+        'Statement[0].Condition.DateLessThan.AWS:EpochTime',
+        expireTimeSecs,
+      );
     });
   });
 });

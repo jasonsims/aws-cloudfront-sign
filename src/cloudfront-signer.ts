@@ -3,8 +3,39 @@
  */
 
 import { URL } from 'node:url';
-import { SignatureOptions } from './types';
-import { getPrivateKey, createPolicy, createPolicySignature, getExpireTime, getIpRange, normalizeBase64 } from './utils';
+import { SignatureOptions } from './types.js';
+import {
+  getPrivateKey,
+  createPolicy,
+  getExpireTime,
+  getIpRange,
+  normalizeBase64,
+  signPolicy,
+} from './utils.js';
+
+/**
+ * Build, serialize and sign the canned policy for a resource.
+ *
+ * @param cfUrl CloudFront resource URL
+ * @param params Signature parameters
+ * @return Policy expiry (seconds) plus URL-safe base64 policy and signature
+ */
+function createSignedPolicy(cfUrl: string, params: SignatureOptions) {
+  const privateKey = getPrivateKey(params);
+  const policy = createPolicy(cfUrl, getExpireTime(params), getIpRange(params));
+  const policyJson = policy.toJSON();
+  const signature = signPolicy(
+    policyJson,
+    privateKey,
+    params.privateKeyPassphrase,
+  );
+
+  return {
+    expireTime: policy.expireTime,
+    policy: normalizeBase64(Buffer.from(policyJson).toString('base64')),
+    signature: normalizeBase64(signature),
+  };
+}
 
 /**
  * Build an AWS signed URL.
@@ -13,21 +44,16 @@ import { getPrivateKey, createPolicy, createPolicySignature, getExpireTime, getI
  * @param params Signature parameters
  * @return Signed CloudFront URL
  */
-export function getSignedUrl (cfUrl: string, params: SignatureOptions): string {
-  const privateKey = getPrivateKey(params);
-  const policy = createPolicy(cfUrl, getExpireTime(params), getIpRange(params));
-  const signature = createPolicySignature(policy, privateKey);
-  const policyStr = Buffer.from(policy.toJSON()).toString('base64');
+export function getSignedUrl(cfUrl: string, params: SignatureOptions): string {
+  const { expireTime, policy, signature } = createSignedPolicy(cfUrl, params);
 
-  // Parse the cloudfront URL so we can add the querystring values required by
-  // AWS signed URLs. We need to assign an empty string to the `search`
-  // property so that the object value of `.query` is used when `.format()`
-  // is called.
+  // Parse the CloudFront URL so we can add the query string values required
+  // by AWS signed URLs.
   const parsedUrl = new URL(cfUrl);
 
-  parsedUrl.searchParams.set('Expires', `${policy.expireTime}`);
-  parsedUrl.searchParams.set('Policy', normalizeBase64(policyStr));
-  parsedUrl.searchParams.set('Signature', normalizeBase64(signature));
+  parsedUrl.searchParams.set('Expires', `${expireTime}`);
+  parsedUrl.searchParams.set('Policy', policy);
+  parsedUrl.searchParams.set('Signature', signature);
   parsedUrl.searchParams.set('Key-Pair-Id', params.keypairId);
 
   // Return a formatted URL string with signature.
@@ -42,8 +68,10 @@ export function getSignedUrl (cfUrl: string, params: SignatureOptions): string {
  * @param params Signature parameters
  * @return Cloudfront server path and stream name with RTMP formatting
  */
-export function getSignedRTMPUrl () {
-  throw new Error('Amazon CloudFront has deprecated RTMP distributions. For more information see https://repost.aws/questions/QUoUZgHZh7SEWlnQUPlBmVNQ/announcement-rtmp-support-discontinuing-on-december-31-2020');
+export function getSignedRTMPUrl() {
+  throw new Error(
+    'Amazon CloudFront has deprecated RTMP distributions. For more information see https://repost.aws/questions/QUoUZgHZh7SEWlnQUPlBmVNQ/announcement-rtmp-support-discontinuing-on-december-31-2020',
+  );
 }
 
 /**
@@ -53,17 +81,15 @@ export function getSignedRTMPUrl () {
  * @param params - Signature parameters
  * @return List of CloudFront cookies
  */
-export function getSignedCookies (cfUrl: string, params: SignatureOptions): Record<string, string> {
-  const privateKey = getPrivateKey(params);
-  const policy = createPolicy(
-    cfUrl, getExpireTime(params), getIpRange(params));
-  const signature = createPolicySignature(policy, privateKey);
-  const policyStr = Buffer.from(policy.toJSON()).toString('base64');
+export function getSignedCookies(
+  cfUrl: string,
+  params: SignatureOptions,
+): Record<string, string> {
+  const { policy, signature } = createSignedPolicy(cfUrl, params);
 
-  const cookies: Record<string, string> = {};
-  cookies['CloudFront-Policy'] = normalizeBase64(policyStr);
-  cookies['CloudFront-Signature'] = normalizeBase64(signature);
-  cookies['CloudFront-Key-Pair-Id'] = params.keypairId;
-
-  return cookies;
+  return {
+    'CloudFront-Policy': policy,
+    'CloudFront-Signature': signature,
+    'CloudFront-Key-Pair-Id': params.keypairId,
+  };
 }

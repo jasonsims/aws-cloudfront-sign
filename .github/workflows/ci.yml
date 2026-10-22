@@ -1,0 +1,142 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    name: Lint, typecheck, build, package checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npm run check:package
+
+  test:
+    name: Test (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Dev tooling (vitest 5, commitlint 21) requires Node >= 22.12, so the
+        # test suite cannot run on 18/20. The `integration` job covers those
+        # against the packed tarball instead.
+        node: [22, 24, 26]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - run: npm ci
+      - run: npm test
+
+  pack:
+    name: Pack tarball
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Pack
+        run: |
+          mkdir -p pack
+          npm pack --pack-destination pack
+          mv pack/*.tgz pack/aws-cloudfront-sign.tgz
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: package-tarball
+          path: pack/aws-cloudfront-sign.tgz
+          if-no-files-found: error
+          retention-days: 7
+
+  integration:
+    name: Integration tests (Node ${{ matrix.node }})
+    needs: pack
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Every Node major allowed by package.json#engines (>=18). Installs only
+        # the packed tarball (no devDependencies), so old Nodes are fine here.
+        node: [18, 20, 22, 24]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            scripts
+            test/integration
+            test/files
+          sparse-checkout-cone-mode: true
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: package-tarball
+          path: ${{ runner.temp }}/pack
+
+      - name: Run integration tests against the tarball
+        env:
+          TARBALL: ${{ runner.temp }}/pack/aws-cloudfront-sign.tgz
+        run: node scripts/integration-test.mjs "$TARBALL"
+
+  baseline:
+    # The integration suite must also pass against the latest published
+    # release, so a PR can't change the suite to fit new behaviour unnoticed.
+    # Expected to fail only for intentional breaking changes (major releases).
+    name: Integration tests vs latest npm release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            scripts
+            test/integration
+            test/files
+          sparse-checkout-cone-mode: true
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      - run: node scripts/integration-test.mjs npm:aws-cloudfront-sign@latest

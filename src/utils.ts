@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { createSign } from 'crypto';
-import CannedPolicy from './canned-policy';
-import { SignatureOptions } from './types';
+import CannedPolicy from './canned-policy.js';
+import { SignatureOptions } from './types.js';
 
 /**
  * Create a URL safe Base64 encoded string.
@@ -13,17 +13,18 @@ import { SignatureOptions } from './types';
  * For more information, see
  * http://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-creating-signed-url-canned-policy.html
  */
-export function normalizeBase64 (str: string): string {
-  return str
-    .replace(/\+/g, '-')
-    .replace(/=/g, '_')
-    .replace(/\//g, '~');
+export function normalizeBase64(str: string): string {
+  return str.replace(/\+/g, '-').replace(/=/g, '_').replace(/\//g, '~');
 }
 
 /**
  * Create an AWS policy.
  */
-export function createPolicy (cfUrl: string, expireTime: number, ipRange: string): CannedPolicy {
+export function createPolicy(
+  cfUrl: string,
+  expireTime: number,
+  ipRange: string,
+): CannedPolicy {
   // If an expiration time isn't set, default to 30 minutes.
   const defaultExpireTime = Math.round(Date.now() + 1800000);
   expireTime = expireTime || defaultExpireTime;
@@ -34,9 +35,28 @@ export function createPolicy (cfUrl: string, expireTime: number, ipRange: string
 /**
  * Create a policy signature.
  */
-export function createPolicySignature (policy: CannedPolicy, privateKey: string): string {
+export function createPolicySignature(
+  policy: CannedPolicy,
+  privateKey: string,
+  passphrase?: string,
+): string {
+  return signPolicy(policy.toJSON(), privateKey, passphrase);
+}
+
+/**
+ * Sign an already serialized policy.
+ */
+export function signPolicy(
+  policyJson: string,
+  privateKey: string,
+  passphrase?: string,
+): string {
   const sign = createSign('RSA-SHA1');
-  sign.update(policy.toJSON());
+  sign.update(policyJson);
+
+  if (typeof passphrase === 'string') {
+    return sign.sign({ key: privateKey, passphrase }, 'base64');
+  }
 
   return sign.sign(privateKey, 'base64');
 }
@@ -49,21 +69,21 @@ export function createPolicySignature (policy: CannedPolicy, privateKey: string)
  *
  * @see http://momentjs.com/docs
  */
-export function getExpireTime (opts: SignatureOptions): number {
+export function getExpireTime(opts: SignatureOptions): number {
   return +opts.expireTime || null;
 }
 
 /**
  * Helper function for retrieving the IP range from the params object.
  */
-export function getIpRange (opts: SignatureOptions) {
+export function getIpRange(opts: SignatureOptions) {
   return opts.ipRange || null;
 }
 
 /**
  * Helper function for retrieving the private key from the params object.
  */
-export function getPrivateKey (params: SignatureOptions): string {
+export function getPrivateKey(params: SignatureOptions): string {
   let privateKeyString = params.privateKeyString;
   let pem;
 
@@ -71,6 +91,11 @@ export function getPrivateKey (params: SignatureOptions): string {
     pem = readFileSync(params.privateKeyPath);
     privateKeyString = pem.toString('ascii');
   }
+
+  assert(
+    !!privateKeyString,
+    'Missing param: privateKeyString or privateKeyPath',
+  );
 
   const newLinePattern = /\r|\n/;
   const lineBreakExists = newLinePattern.test(privateKeyString);
@@ -84,7 +109,7 @@ export function getPrivateKey (params: SignatureOptions): string {
 /**
  * Assert that an expression evaluates to `true`
  */
-export function assert (assertion: boolean, msg: string) {
+export function assert(assertion: boolean, msg: string) {
   if (!assertion) {
     throw new Error(msg);
   }
