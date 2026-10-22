@@ -76,7 +76,8 @@
     "prepublishOnly": "npm run build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test:integration": "node scripts/integration-test.mjs"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",

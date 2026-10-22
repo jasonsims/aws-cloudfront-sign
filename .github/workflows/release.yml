@@ -75,7 +75,7 @@ jobs:
       - run: npm run build
       - run: npm run check:package
 
-      # Pack once, smoke test that exact tarball, then publish it. Publishing a
+      # Pack once, run the integration tests on that exact tarball, then publish it. Publishing a
       # tarball skips lifecycle scripts, so prepublishOnly doesn't rebuild and
       # the published artifact is the one that was checked.
       - name: Pack
@@ -83,8 +83,8 @@ jobs:
           mkdir -p "$RUNNER_TEMP/pack"
           npm pack --pack-destination "$RUNNER_TEMP/pack"
 
-      - name: Smoke test tarball
-        run: node scripts/smoke-test.mjs "$RUNNER_TEMP"/pack/*.tgz
+      - name: Integration tests on the tarball
+        run: node scripts/integration-test.mjs "$RUNNER_TEMP"/pack/*.tgz
 
       - name: Publish
         run: npm publish "$RUNNER_TEMP"/pack/*.tgz --provenance --access public

@@ -40,7 +40,7 @@ jobs:
       fail-fast: false
       matrix:
         # Dev tooling (vitest 5, commitlint 21) requires Node >= 22.12, so the
-        # test suite cannot run on 18/20. The `smoke` job covers those
+        # test suite cannot run on 18/20. The `integration` job covers those
         # against the packed tarball instead.
         node: [22, 24, 26]
     steps:
@@ -85,8 +85,8 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-  smoke:
-    name: Smoke test tarball (Node ${{ matrix.node }})
+  integration:
+    name: Integration tests (Node ${{ matrix.node }})
     needs: pack
     runs-on: ubuntu-latest
     strategy:
@@ -99,7 +99,10 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-          sparse-checkout: scripts
+          sparse-checkout: |
+            scripts
+            test/integration
+            test/files
           sparse-checkout-cone-mode: true
 
       - uses: actions/setup-node@v7
@@ -111,7 +114,29 @@ jobs:
           name: package-tarball
           path: ${{ runner.temp }}/pack
 
-      - name: Run smoke test
+      - name: Run integration tests against the tarball
         env:
           TARBALL: ${{ runner.temp }}/pack/aws-cloudfront-sign.tgz
-        run: node scripts/smoke-test.mjs "$TARBALL"
+        run: node scripts/integration-test.mjs "$TARBALL"
+
+  baseline:
+    # The integration suite must also pass against the latest published
+    # release, so a PR can't change the suite to fit new behaviour unnoticed.
+    # Expected to fail only for intentional breaking changes (major releases).
+    name: Integration tests vs latest npm release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            scripts
+            test/integration
+            test/files
+          sparse-checkout-cone-mode: true
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      - run: node scripts/integration-test.mjs npm:aws-cloudfront-sign@latest

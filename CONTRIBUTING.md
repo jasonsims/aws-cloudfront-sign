@@ -24,7 +24,21 @@ Development tooling requires Node.js 22.12 or newer.
 npm run lint   # lint the source
 npm test       # run the test suite
 npm run build  # compile to dist/
+npm run test:integration  # pack, install into a temp project, test as a consumer
 ```
+
+`test:integration` installs only the packed tarball into an empty project and
+checks it through `require()`, named `import` and default `import` against a
+reference implementation of CloudFront signing. It can also target other
+builds, so you can confirm a change produces identical output to an existing
+version:
+
+```sh
+npm run test:integration -- master npm:aws-cloudfront-sign@latest .
+```
+
+Targets: `.` (working tree, the default), any git ref, a `.tgz` path, or
+`npm:<spec>`.
 
 ## Commit messages
 
