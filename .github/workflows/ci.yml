@@ -119,6 +119,43 @@ jobs:
           TARBALL: ${{ runner.temp }}/pack/aws-cloudfront-sign.tgz
         run: node scripts/integration-test.mjs "$TARBALL"
 
+  smoke:
+    # Requests signed URLs and cookies from a real CloudFront distribution
+    # (test/integration/cloudfront-smoke.test.mjs). Only after a merge to
+    # master, so PRs never receive the signing key; the release workflow runs
+    # the same checks before staging.
+    name: CloudFront smoke tests
+    if: github.event_name == 'push'
+    needs: pack
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            scripts
+            test/integration
+            test/files
+          sparse-checkout-cone-mode: true
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: package-tarball
+          path: ${{ runner.temp }}/pack
+
+      - name: Run integration tests with CloudFront smoke tests
+        env:
+          TARBALL: ${{ runner.temp }}/pack/aws-cloudfront-sign.tgz
+          CF_SMOKE: required
+          CF_URL: ${{ secrets.CF_URL }}
+          CF_KEYPAIR_ID: ${{ secrets.CF_KEYPAIR_ID }}
+          CF_PRIVATE_KEY: ${{ secrets.CF_PRIVATE_KEY }}
+        run: node scripts/integration-test.mjs "$TARBALL"
+
   baseline:
     # The integration suite must also pass against the latest published
     # release, so a PR can't change the suite to fit new behaviour unnoticed.

@@ -40,6 +40,27 @@ npm run test:integration -- master npm:aws-cloudfront-sign@latest .
 Targets: `.` (working tree, the default), any git ref, a `.tgz` path, or
 `npm:<spec>`.
 
+### CloudFront smoke tests
+
+`test/integration/cloudfront-smoke.test.mjs` requests signed URLs and cookies
+from a real CloudFront distribution, to prove AWS accepts what the package
+produces. It needs `CF_URL`, `CF_KEYPAIR_ID` and `CF_PRIVATE_KEY` (see
+`.env.example` for what each one is; copy it to `.env` to run locally) and is
+skipped while any of them is empty. With values set, it runs for every target
+`test:integration` is given.
+
+In CI the values come from repository secrets of the same names, used only by
+the `CloudFront smoke tests` job, which runs on pushes to `master` (not on pull
+requests), and by the release workflow before it stages a version. Both set
+`CF_SMOKE=required`, so a missing secret fails the run instead of skipping it.
+To set the secrets from a local setup:
+
+```sh
+gh secret set CF_URL --body "https://<distribution>.cloudfront.net/<object>"
+gh secret set CF_KEYPAIR_ID --body "<public key ID>"
+gh secret set CF_PRIVATE_KEY < private_key.pem
+```
+
 ## Commit messages
 
 This project requires [Conventional Commits](https://www.conventionalcommits.org/),
