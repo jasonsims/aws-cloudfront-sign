@@ -96,16 +96,16 @@ const cookieHeader = (cookies) =>
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+const options = (overrides) => ({
+  keypairId,
+  privateKeyString: privateKey,
+  expireTime: Date.now() + 5 * 60_000,
+  ...overrides,
+});
+
 describe('CloudFront smoke', { skip }, () => {
   // CloudFront's clock minus ours, from the Date header (1 s resolution).
   let skewMs = 0;
-
-  const options = (overrides) => ({
-    keypairId,
-    privateKeyString: privateKey,
-    expireTime: Date.now() + 5 * 60_000,
-    ...overrides,
-  });
 
   before(async () => {
     assert.deepEqual(

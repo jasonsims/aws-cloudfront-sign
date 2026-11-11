@@ -16,7 +16,7 @@ import { createPublicKey, generateKeyPairSync, verify } from 'crypto';
 import moment from 'moment';
 
 import { getSignedUrl, getSignedCookies } from './cloudfront-signer';
-import { SignatureOptions, AwsPolicy } from './types';
+import { SignatureOptions } from './types';
 
 // Reverse `normalizeBase64` and decode to raw bytes.
 function denormalizeBase64(str: string): Buffer {
@@ -30,8 +30,8 @@ function denormalizeBase64(str: string): Buffer {
   return Buffer.from(str, 'base64');
 }
 
-function deserializePolicy(policy: string): AwsPolicy {
-  return JSON.parse(denormalizeBase64(policy).toString('ascii')) as AwsPolicy;
+function deserializePolicy(policy: string): unknown {
+  return JSON.parse(denormalizeBase64(policy).toString('ascii'));
 }
 
 // Cryptographically verify a normalized CloudFront signature over a
@@ -209,9 +209,7 @@ describe('CloudfrontUtil', function () {
       const parsedResult: URL = new URL(result);
       const policy = deserializePolicy(parsedResult.searchParams.get('Policy'));
 
-      expect(policy).toHaveProperty('Statement');
-      expect(policy.Statement[0]).toHaveProperty('Resource');
-      expect(policy.Statement[0].Resource).toBe('http://foo.com');
+      expect(policy).toHaveProperty('Statement[0].Resource', 'http://foo.com');
     });
 
     it('should include original query params', () => {
@@ -299,7 +297,7 @@ describe('CloudfrontUtil', function () {
           privateKeyString: encryptedKey,
           privateKeyPassphrase: 'wrong passphrase',
         }),
-      ).toThrow();
+      ).toThrow(/bad decrypt/);
     });
 
     it('should throw when the passphrase is missing', () => {
@@ -308,7 +306,7 @@ describe('CloudfrontUtil', function () {
           keypairId: 'ABC123',
           privateKeyString: encryptedKey,
         }),
-      ).toThrow();
+      ).toThrow(/interrupted or cancelled/);
     });
 
     it('should still reject a single line encrypted key', () => {
@@ -331,7 +329,7 @@ describe('CloudfrontUtil', function () {
       expect(result).toHaveProperty('CloudFront-Key-Pair-Id', 'ABC123');
 
       const policy = deserializePolicy(result['CloudFront-Policy']);
-      expect(policy.Statement[0].Resource).toBe('http://foo.com');
+      expect(policy).toHaveProperty('Statement[0].Resource', 'http://foo.com');
     });
   });
 });
