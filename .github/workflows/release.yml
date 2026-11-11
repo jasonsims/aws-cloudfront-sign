@@ -88,7 +88,14 @@ jobs:
           mkdir -p "$RUNNER_TEMP/pack"
           npm pack --pack-destination "$RUNNER_TEMP/pack"
 
-      - name: Integration tests on the tarball
+      # Includes the CloudFront smoke tests; CF_SMOKE=required fails the release
+      # if the secrets are missing rather than skipping them.
+      - name: Integration tests on the tarball (incl. CloudFront smoke tests)
+        env:
+          CF_SMOKE: required
+          CF_URL: ${{ secrets.CF_URL }}
+          CF_KEYPAIR_ID: ${{ secrets.CF_KEYPAIR_ID }}
+          CF_PRIVATE_KEY: ${{ secrets.CF_PRIVATE_KEY }}
         run: node scripts/integration-test.mjs "$RUNNER_TEMP"/pack/*.tgz
 
       - name: Stage for publishing

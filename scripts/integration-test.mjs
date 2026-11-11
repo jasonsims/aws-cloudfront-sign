@@ -13,6 +13,12 @@
 //
 // The suite is always taken from this checkout, so the same tests can be run
 // against older builds to check for regressions.
+//
+// CloudFront smoke tests (test/integration/cloudfront-smoke.test.mjs) read
+// CF_* variables from the environment or from a .env file at the repo root
+// (copy .env.example); that file decides whether they run. CF_* values are
+// passed only to the test step, never to the build or pack steps, so a
+// target's build tooling can't read the signing key.
 import { execFileSync } from 'node:child_process';
 import {
   cpSync,
@@ -20,6 +26,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readdirSync,
+  readFileSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
@@ -32,10 +39,39 @@ const suiteDir = join(repoRoot, 'test', 'integration');
 const keyFile = join(repoRoot, 'test', 'files', 'dummy.pem');
 const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 
-function run(cmd, args, cwd) {
+// Load .env without overriding the real environment. Hand-rolled because
+// process.loadEnvFile() needs Node >= 20.12. Supports KEY=value (a ' #'
+// starts a comment), 'single' and "double" quotes; a double-quoted value may
+// span lines (for a PEM key).
+function readDotEnv(file) {
+  const vars = {};
+  if (!existsSync(file)) return vars;
+  const text = readFileSync(file, 'utf8').replace(/\r\n?/g, '\n');
+  const entry =
+    /^[ \t]*(?:export[ \t]+)?([A-Za-z_]\w*)[ \t]*=[ \t]*(?:"([^"]*)"|'([^']*)'|(.*))/gm;
+  for (const [, key, dq, sq, bare] of text.matchAll(entry)) {
+    vars[key] = dq ?? sq ?? bare.replace(/(^|[ \t])#.*$/, '').trim();
+  }
+  return vars;
+}
+
+const isSmokeVar = (name) => name.startsWith('CF_');
+const buildEnv = Object.fromEntries(
+  Object.entries(process.env).filter(([name]) => !isSmokeVar(name)),
+);
+const testEnv = { ...buildEnv };
+for (const [name, value] of Object.entries({
+  ...readDotEnv(join(repoRoot, '.env')),
+  ...process.env,
+})) {
+  if (isSmokeVar(name)) testEnv[name] = value;
+}
+
+function run(cmd, args, cwd, env = buildEnv) {
   console.log(`$ ${cmd} ${args.join(' ')}  (in ${cwd})`);
   execFileSync(cmd, args, {
     cwd,
+    env,
     stdio: 'inherit',
     shell: process.platform === 'win32',
   });
@@ -119,7 +155,7 @@ function testTarget(target) {
     const tests = readdirSync(consumer).filter((f) =>
       /\.test\.(c|m)?js$/.test(f),
     );
-    run(process.execPath, ['--test', ...tests], consumer);
+    run(process.execPath, ['--test', ...tests], consumer, testEnv);
     return true;
   } catch (err) {
     console.error(`\n✖ ${target}: ${err.message}`);
