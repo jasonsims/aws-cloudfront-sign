@@ -163,6 +163,14 @@ describe('CloudfrontUtil', function () {
       expect(params.expireTime).toBe('2030-01-01');
     });
 
+    it('should fail with a clear error when no private key is given', () => {
+      const params: SignatureOptions = { keypairId: 'ABC123' };
+
+      expect(() => getSignedUrl('http://foo.com', params)).toThrow(
+        /missing param: privateKeyString or privateKeyPath/i,
+      );
+    });
+
     it('should fail to accept single line private key as string', () => {
       const params = Object.assign({}, defaultParams, {
         privateKeyString: 'this_is_a_test_..._a_single_line_string',
