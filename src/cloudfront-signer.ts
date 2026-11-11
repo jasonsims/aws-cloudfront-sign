@@ -23,7 +23,11 @@ import {
 export function getSignedUrl(cfUrl: string, params: SignatureOptions): string {
   const privateKey = getPrivateKey(params);
   const policy = createPolicy(cfUrl, getExpireTime(params), getIpRange(params));
-  const signature = createPolicySignature(policy, privateKey);
+  const signature = createPolicySignature(
+    policy,
+    privateKey,
+    params.privateKeyPassphrase,
+  );
   const policyStr = Buffer.from(policy.toJSON()).toString('base64');
 
   // Parse the cloudfront URL so we can add the querystring values required by
@@ -68,7 +72,11 @@ export function getSignedCookies(
 ): Record<string, string> {
   const privateKey = getPrivateKey(params);
   const policy = createPolicy(cfUrl, getExpireTime(params), getIpRange(params));
-  const signature = createPolicySignature(policy, privateKey);
+  const signature = createPolicySignature(
+    policy,
+    privateKey,
+    params.privateKeyPassphrase,
+  );
   const policyStr = Buffer.from(policy.toJSON()).toString('base64');
 
   const cookies: Record<string, string> = {};
