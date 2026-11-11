@@ -30,6 +30,15 @@ function denormalizeBase64(str: string): Buffer {
   return Buffer.from(str, 'base64');
 }
 
+// Read a query param that the signer must have set.
+function requireParam(url: URL, name: string): string {
+  const value = url.searchParams.get(name);
+  if (value === null) {
+    throw new Error(`Missing query param: ${name}`);
+  }
+  return value;
+}
+
 function deserializePolicy(policy: string): AwsPolicy {
   return JSON.parse(denormalizeBase64(policy).toString('ascii')) as AwsPolicy;
 }
@@ -146,8 +155,8 @@ describe('CloudfrontUtil', function () {
 
       expect(
         verifySignature(
-          parsedResult.searchParams.get('Policy'),
-          parsedResult.searchParams.get('Signature'),
+          requireParam(parsedResult, 'Policy'),
+          requireParam(parsedResult, 'Signature'),
           createPublicKey(pkey),
         ),
       ).toBe(true);
@@ -207,7 +216,7 @@ describe('CloudfrontUtil', function () {
       const params = Object.assign({}, defaultParams);
       const result = getSignedUrl('http://foo.com', params);
       const parsedResult: URL = new URL(result);
-      const policy = deserializePolicy(parsedResult.searchParams.get('Policy'));
+      const policy = deserializePolicy(requireParam(parsedResult, 'Policy'));
 
       expect(policy).toHaveProperty('Statement');
       expect(policy.Statement[0]).toHaveProperty('Resource');
@@ -269,8 +278,8 @@ describe('CloudfrontUtil', function () {
 
       expect(
         verifySignature(
-          parsedResult.searchParams.get('Policy'),
-          parsedResult.searchParams.get('Signature'),
+          requireParam(parsedResult, 'Policy'),
+          requireParam(parsedResult, 'Signature'),
           publicKey,
         ),
       ).toBe(true);

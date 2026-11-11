@@ -18,8 +18,8 @@ export default defineConfig(
       },
     },
     rules: {
-      // Requires `strictNullChecks`, which the project doesn't enable yet
-      // (turning it on needs public type changes). Revisit with `strict: true`.
+      // The `||` fallbacks in utils.ts intentionally treat falsy values
+      // (0, NaN, '') as unset; `??` would change that behavior.
       '@typescript-eslint/prefer-nullish-coalescing': 'off',
     },
   },

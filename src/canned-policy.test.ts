@@ -14,12 +14,14 @@ describe('CannedPolicy', function () {
   describe('.toJSON()', function () {
     it('should fail if `url` is missing', () => {
       const expireTimeMs = new Date().getTime();
+      // @ts-expect-error: exercising the runtime check for untyped callers
       const policy = new CannedPolicy(undefined, expireTimeMs);
       const func = () => policy.toJSON();
 
       expect(func).toThrow(/missing param: url/i);
     });
     it('should fail if `expireTime` is missing', () => {
+      // @ts-expect-error: exercising the runtime check for untyped callers
       const policy = new CannedPolicy('test', undefined);
       const func = () => policy.toJSON();
 

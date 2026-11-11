@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
-    "noImplicitAny": true,
+    "strict": true,
     "removeComments": false,
     "preserveConstEnums": true,
     "sourceMap": true,
     "allowJs": true,
     "esModuleInterop": true,
-    "moduleResolution": "Node",
-    "declaration": true
+    "declaration": true,
+    "types": ["node"]
   },
   "include": ["src/**/*"],
   "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts"]

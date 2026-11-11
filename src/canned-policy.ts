@@ -3,8 +3,8 @@ import { AwsPolicy } from './types.js';
 
 export default class CannedPolicy {
   url: string;
-  expireTime: number;
-  ipRange: string;
+  expireTime: number | undefined;
+  ipRange: string | undefined;
 
   constructor(url: string, expireTime: number, ipRange?: string) {
     this.url = url;
@@ -17,7 +17,7 @@ export default class CannedPolicy {
    */
   toJSON(): string {
     // Ensure the current instance is valid before building the canned policy.
-    this.#validate();
+    const expireTime = this.#validate();
 
     const policy: AwsPolicy = {
       Statement: [
@@ -25,7 +25,7 @@ export default class CannedPolicy {
           Resource: this.url,
           Condition: {
             DateLessThan: {
-              'AWS:EpochTime': this.expireTime,
+              'AWS:EpochTime': expireTime,
             },
           },
         },
@@ -44,23 +44,26 @@ export default class CannedPolicy {
   /**
    * Check for common mistakes with types
    * @private
+   * @return The validated expire time (seconds)
    */
-  #validate() {
+  #validate(): number {
+    const { expireTime } = this;
+
     // Ensure required params are present
     assert(!!this.url, 'Missing param: url');
-    assert(!!this.expireTime, 'Missing param: expireTime');
+    assert(!!expireTime, 'Missing param: expireTime');
 
     // Ensure expireTime value is valid
     assert(
-      this.expireTime < 2147483647,
+      expireTime < 2147483647,
       'expireTime must be less than January 19, 2038 03:14:08 GMT ' +
         'due to the limits of UNIX time',
     );
     assert(
-      this.expireTime > new Date().getTime() / 1000,
+      expireTime > new Date().getTime() / 1000,
       'expireTime must be after the current time',
     );
 
-    return true;
+    return expireTime;
   }
 }
