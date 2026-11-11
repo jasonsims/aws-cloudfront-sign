@@ -7,30 +7,35 @@ trusted publishing, so every version ships with a
 The workflow is only allowed to *stage* a version: a maintainer approves it,
 with 2FA, before it goes live. Nobody needs to run `npm publish` locally.
 
-1. On an up-to-date `master` with a clean working tree, bump the version. This
-   updates `package.json`/`package-lock.json`, commits, and creates a `vX.Y.Z`
-   tag:
+`master` only accepts changes through pull requests, so the version bump is
+a PR, and the tag is created with the GitHub release.
+
+1. On a branch from an up-to-date `master`, bump the version without
+   committing or tagging, and date the version's `CHANGELOG.md` entry:
 
    ```sh
-   npm version <patch|minor|major>
+   git switch -c release/vX.Y.Z origin/master
+   npm version <patch|minor|major> --no-git-tag-version
    ```
 
-2. Push the commit and the tag:
+   Commit `package.json`, `package-lock.json` and `CHANGELOG.md` as
+   `chore(release): X.Y.Z`, open a pull request and merge it once CI passes.
 
-   ```sh
-   git push --follow-tags
-   ```
+2. On GitHub, [create a release](https://github.com/jasonsims/aws-cloudfront-sign/releases/new):
+   choose **Create new tag** `vX.Y.Z` on `master` (the merge commit from step
+   1), paste the version's `CHANGELOG.md` entry as the notes, and publish it.
+   Only repository admins can create tags.
 
-3. On GitHub, [create a release](https://github.com/jasonsims/aws-cloudfront-sign/releases/new)
-   from the new tag and publish it.
-
-4. The **Release** workflow runs lint, typecheck, tests, build and package
+3. The **Release** workflow runs lint, typecheck, tests, build and package
    checks, verifies the tag matches `package.json`'s version, packs the
-   tarball, runs the integration tests against it, then stages that exact
-   tarball with `npm stage publish --provenance`. Watch it under
+   tarball, runs the integration tests and the CloudFront smoke tests against
+   it, then stages that exact tarball with `npm stage publish --provenance`.
+   The smoke tests are required here: if the `CF_URL`, `CF_KEYPAIR_ID` or
+   `CF_PRIVATE_KEY` repository secrets are missing, the release fails. Watch
+   it under
    [Actions](https://github.com/jasonsims/aws-cloudfront-sign/actions/workflows/release.yml).
 
-5. Approve the staged version on
+4. Approve the staged version on
    [npmjs.com](https://www.npmjs.com/package/aws-cloudfront-sign) (you will be
    asked for 2FA), or from a terminal logged in to npm:
 
@@ -42,6 +47,7 @@ with 2FA, before it goes live. Nobody needs to run `npm publish` locally.
    To inspect it first, `npm stage download <stage-id>`; to discard it,
    `npm stage reject <stage-id>`.
 
-If the workflow fails, or a staged version is rejected, nothing was published. Fix the problem on `master` and
-release again from step 1 (deleting the failed release and tag first if you
-want to reuse the version number).
+If the workflow fails, or a staged version is rejected, nothing was
+published. Fix the problem in a pull request, delete the failed release and
+its tag, and publish the release again from step 2 (the version bump from
+step 1 can stay).

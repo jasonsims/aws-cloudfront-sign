@@ -19,6 +19,7 @@
 * bugfix: `expireTime` type now accepts a number (ms), numeric string, `Date`, or any object with `valueOf()` (e.g. moment, dayjs)
 * bugfix: a missing private key now throws `Missing param: privateKeyString or privateKeyPath`
 * development: added a consumer integration suite that checks signed URLs and cookies are byte-identical to 3.0.2
+* development: added CloudFront smoke tests that request signed URLs and cookies from a real distribution, run on every merge and before every release
 * development: migrated test suite to Vitest
 * development: migrated to ESLint flat config and added Prettier
 * development: added GitHub Actions CI and npm publishing with provenance
