@@ -12,6 +12,7 @@
 [joelwass]: https://github.com/joelwass
 
 ## 4.0.0 (Unreleased)
+* breaking: Node.js 22 or later is required (`engines.node` is now `>=22`). Node.js 18 and 20 have reached end of life; 3.x still works there
 * breaking: the package now declares an `exports` map. Only `aws-cloudfront-sign`, `aws-cloudfront-sign/types`, `aws-cloudfront-sign/package.json` and `aws-cloudfront-sign/dist/*` resolve, and deep imports into `dist/` must include the file extension (`dist/cjs/utils.js`, not `dist/cjs/utils`). Imports from the package entry are unaffected
 * feature: ES Modules now work (`import { getSignedUrl } from 'aws-cloudfront-sign'`); the 3.0.x ESM build was unreachable. A default export is also provided. CommonJS is unchanged
 * feature: public types (`SignatureOptions`, `ExpireTime`) are exported from the package entry, and the `aws-cloudfront-sign/types` subpath now resolves
