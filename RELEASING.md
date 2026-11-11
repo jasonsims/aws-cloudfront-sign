@@ -1,10 +1,11 @@
 # Releasing
 
-Releases are published to npm by GitHub Actions
+Releases are staged on npm by GitHub Actions
 ([`.github/workflows/release.yml`](.github/workflows/release.yml)) using npm
 trusted publishing, so every version ships with a
 [provenance attestation](https://docs.npmjs.com/generating-provenance-statements).
-Nobody needs to run `npm publish` locally.
+The workflow is only allowed to *stage* a version: a maintainer approves it,
+with 2FA, before it goes live. Nobody needs to run `npm publish` locally.
 
 1. On an up-to-date `master` with a clean working tree, bump the version. This
    updates `package.json`/`package-lock.json`, commits, and creates a `vX.Y.Z`
@@ -25,10 +26,22 @@ Nobody needs to run `npm publish` locally.
 
 4. The **Release** workflow runs lint, typecheck, tests, build and package
    checks, verifies the tag matches `package.json`'s version, packs the
-   tarball, runs the integration tests against it, then publishes that exact
-   tarball with `npm publish --provenance`. Watch it under
+   tarball, runs the integration tests against it, then stages that exact
+   tarball with `npm stage publish --provenance`. Watch it under
    [Actions](https://github.com/jasonsims/aws-cloudfront-sign/actions/workflows/release.yml).
 
-If the workflow fails, nothing was published. Fix the problem on `master` and
+5. Approve the staged version on
+   [npmjs.com](https://www.npmjs.com/package/aws-cloudfront-sign) (you will be
+   asked for 2FA), or from a terminal logged in to npm:
+
+   ```sh
+   npm stage list aws-cloudfront-sign
+   npm stage approve <stage-id>
+   ```
+
+   To inspect it first, `npm stage download <stage-id>`; to discard it,
+   `npm stage reject <stage-id>`.
+
+If the workflow fails, or a staged version is rejected, nothing was published. Fix the problem on `master` and
 release again from step 1 (deleting the failed release and tag first if you
 want to reuse the version number).

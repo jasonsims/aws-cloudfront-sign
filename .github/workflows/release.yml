@@ -1,7 +1,10 @@
-# Publishes the package to npm when a GitHub release is published.
+# Stages the package on npm when a GitHub release is published. A maintainer
+# then approves the staged version on npmjs.com (with 2FA) to make it live.
 #
 # Uses npm trusted publishing (OIDC), so no NPM_TOKEN secret is needed and
-# provenance attestations are generated automatically. See RELEASING.md.
+# provenance attestations are generated automatically. The trusted publisher
+# may only stage, so a compromised workflow can never publish on its own.
+# See RELEASING.md.
 #
 # One-time setup on npmjs.com (package maintainer):
 #   1. Open https://www.npmjs.com/package/aws-cloudfront-sign/access
@@ -10,6 +13,8 @@
 #        Repository:           aws-cloudfront-sign
 #        Workflow filename:    release.yml
 #        Environment:          (leave empty)
+#      and leave "Allow npm publish" and "Allow npm dist-tag" unchecked
+#      (`npm stage publish` is always allowed).
 #   3. Optionally, set "Publishing access" to require 2FA and disallow tokens,
 #      so trusted publishing is the only way to publish.
 name: Release
@@ -44,15 +49,15 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
 
-      - name: Ensure npm supports trusted publishing (>= 11.5.1)
+      - name: Ensure npm supports staged publishing (>= 11.15.0)
         run: |
           current="$(npm --version)"
           echo "npm $current"
           if ! node -e '
-            const [maj, min, pat] = process.argv[1].split(".").map(Number);
-            process.exit(maj > 11 || (maj === 11 && (min > 5 || (min === 5 && pat >= 1))) ? 0 : 1);
+            const [maj, min] = process.argv[1].split(".").map(Number);
+            process.exit(maj > 11 || (maj === 11 && min >= 15) ? 0 : 1);
           ' "$current"; then
-            npm install -g "npm@^11.5.1"
+            npm install -g "npm@^11.15.0"
             echo "upgraded to npm $(npm --version)"
           fi
 
@@ -75,9 +80,9 @@ jobs:
       - run: npm run build
       - run: npm run check:package
 
-      # Pack once, run the integration tests on that exact tarball, then publish it. Publishing a
-      # tarball skips lifecycle scripts, so prepublishOnly doesn't rebuild and
-      # the published artifact is the one that was checked.
+      # Pack once, run the integration tests on that exact tarball, then stage
+      # it. Staging a tarball skips lifecycle scripts, so prepublishOnly doesn't
+      # rebuild and the staged artifact is the one that was checked.
       - name: Pack
         run: |
           mkdir -p "$RUNNER_TEMP/pack"
@@ -86,5 +91,9 @@ jobs:
       - name: Integration tests on the tarball
         run: node scripts/integration-test.mjs "$RUNNER_TEMP"/pack/*.tgz
 
-      - name: Publish
-        run: npm publish "$RUNNER_TEMP"/pack/*.tgz --provenance --access public
+      - name: Stage for publishing
+        run: npm stage publish "$RUNNER_TEMP"/pack/*.tgz --provenance --access public
+
+      - name: Approval needed
+        run: |
+          echo "::notice::Staged. Approve it on npmjs.com (or run 'npm stage list aws-cloudfront-sign' and 'npm stage approve <stage-id>') to publish."
