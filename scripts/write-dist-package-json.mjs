@@ -9,5 +9,8 @@ const formats = { esm: 'module', cjs: 'commonjs' };
 for (const [dir, type] of Object.entries(formats)) {
   const outDir = join('dist', dir);
   mkdirSync(outDir, { recursive: true });
-  writeFileSync(join(outDir, 'package.json'), JSON.stringify({ type }, null, 2) + '\n');
+  writeFileSync(
+    join(outDir, 'package.json'),
+    JSON.stringify({ type }, null, 2) + '\n',
+  );
 }

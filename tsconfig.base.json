@@ -7,11 +7,8 @@
     "allowJs": true,
     "esModuleInterop": true,
     "moduleResolution": "Node",
-    "declaration": true,
+    "declaration": true
   },
   "include": ["src/**/*"],
-  "exclude": [
-    "src/**/*.spec.ts",
-    "src/**/*.test.ts"
-  ]
+  "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts"]
 }
