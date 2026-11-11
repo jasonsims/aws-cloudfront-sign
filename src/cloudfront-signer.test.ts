@@ -9,7 +9,7 @@ import moment from 'moment';
 import { getSignedUrl, getSignedCookies } from './cloudfront-signer';
 import { SignatureOptions, AwsPolicy } from './types';
 
-function deserializePolicy (policy: string): AwsPolicy {
+function deserializePolicy(policy: string): AwsPolicy {
   const safeBase64Chars = { '+': '-', '=': '_', '/': '~' };
 
   Object.entries(safeBase64Chars).forEach(([actualChar, safeChar]) => {
@@ -17,7 +17,9 @@ function deserializePolicy (policy: string): AwsPolicy {
     policy = policy.replace(re, actualChar);
   });
 
-  return JSON.parse(Buffer.from(policy, 'base64').toString('ascii')) as AwsPolicy;
+  return JSON.parse(
+    Buffer.from(policy, 'base64').toString('ascii'),
+  ) as AwsPolicy;
 }
 
 describe('CloudfrontUtil', function () {
@@ -38,7 +40,7 @@ describe('CloudfrontUtil', function () {
     pkey = readFileSync(join(cwd(), pkeyPath));
     defaultParams = {
       keypairId: 'ABC123',
-      privateKeyString: pkey.toString('ascii')
+      privateKeyString: pkey.toString('ascii'),
     };
   });
 
@@ -52,7 +54,7 @@ describe('CloudfrontUtil', function () {
     it('should accept `expireTime` as a string', () => {
       const testExpireTime = moment().add(1, 'day').unix() * 1000;
       const params = Object.assign({}, defaultParams, {
-        expireTime: testExpireTime.toString()
+        expireTime: testExpireTime.toString(),
       });
       const result = getSignedUrl('http://foo.com', params);
       const parsedResult: URL = new URL(result);
@@ -64,7 +66,7 @@ describe('CloudfrontUtil', function () {
     it('should accept `expireTime` as a number', () => {
       const testExpireTime = moment().add(1, 'day').unix() * 1000;
       const params = Object.assign({}, defaultParams, {
-        expireTime: testExpireTime
+        expireTime: testExpireTime,
       });
       const result = getSignedUrl('http://foo.com', params);
       const parsedResult: URL = new URL(result);
@@ -76,7 +78,7 @@ describe('CloudfrontUtil', function () {
     it('should accept `expireTime` as a moment', () => {
       const testExpireTime = moment().add(1, 'day');
       const params = Object.assign({}, defaultParams, {
-        expireTime: testExpireTime
+        expireTime: testExpireTime,
       });
       const result = getSignedUrl('http://foo.com', params);
       const parsedResult: URL = new URL(result);
@@ -88,12 +90,13 @@ describe('CloudfrontUtil', function () {
     it('should accept `expireTime` as a Date', () => {
       const testExpireTime = new Date(new Date().getTime() + 10000);
       const params = Object.assign({}, defaultParams, {
-        expireTime: testExpireTime
+        expireTime: testExpireTime,
       });
       const result = getSignedUrl('http://foo.com', params);
       const parsedResult: URL = new URL(result);
-      const expectedResult =
-        Math.round(testExpireTime.getTime() / 1000).toString();
+      const expectedResult = Math.round(
+        testExpireTime.getTime() / 1000,
+      ).toString();
 
       expect(parsedResult.searchParams.get('Expires')).toBe(expectedResult);
     });
@@ -108,16 +111,17 @@ describe('CloudfrontUtil', function () {
 
     it('should fail to accept single line private key as string', () => {
       const params = Object.assign({}, defaultParams, {
-        privateKeyString: 'this_is_a_test_..._a_single_line_string'
+        privateKeyString: 'this_is_a_test_..._a_single_line_string',
       });
 
-      expect(() => getSignedUrl('http://foo.com', params))
-        .toThrow(/must include line breaks/);
+      expect(() => getSignedUrl('http://foo.com', params)).toThrow(
+        /must include line breaks/,
+      );
     });
 
     it('should accept private key as filepath', () => {
       const params = Object.assign({}, defaultParams, {
-        privateKeyPath: join(cwd(), pkeyPath)
+        privateKeyPath: join(cwd(), pkeyPath),
       });
       delete params.privateKeyString;
 
@@ -132,7 +136,9 @@ describe('CloudfrontUtil', function () {
       const result = getSignedUrl('http://foo.com', params);
       const parsedResult: URL = new URL(result);
 
-      expect(parsedResult.searchParams.get('Expires')).toBe(`${nowSecs + 1800}`);
+      expect(parsedResult.searchParams.get('Expires')).toBe(
+        `${nowSecs + 1800}`,
+      );
     });
 
     it('should add base64-encoded `Policy` query param', () => {

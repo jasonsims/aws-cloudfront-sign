@@ -4,7 +4,14 @@
 
 import { URL } from 'node:url';
 import { SignatureOptions } from './types.js';
-import { getPrivateKey, createPolicy, createPolicySignature, getExpireTime, getIpRange, normalizeBase64 } from './utils.js';
+import {
+  getPrivateKey,
+  createPolicy,
+  createPolicySignature,
+  getExpireTime,
+  getIpRange,
+  normalizeBase64,
+} from './utils.js';
 
 /**
  * Build an AWS signed URL.
@@ -13,7 +20,7 @@ import { getPrivateKey, createPolicy, createPolicySignature, getExpireTime, getI
  * @param params Signature parameters
  * @return Signed CloudFront URL
  */
-export function getSignedUrl (cfUrl: string, params: SignatureOptions): string {
+export function getSignedUrl(cfUrl: string, params: SignatureOptions): string {
   const privateKey = getPrivateKey(params);
   const policy = createPolicy(cfUrl, getExpireTime(params), getIpRange(params));
   const signature = createPolicySignature(policy, privateKey);
@@ -42,8 +49,10 @@ export function getSignedUrl (cfUrl: string, params: SignatureOptions): string {
  * @param params Signature parameters
  * @return Cloudfront server path and stream name with RTMP formatting
  */
-export function getSignedRTMPUrl () {
-  throw new Error('Amazon CloudFront has deprecated RTMP distributions. For more information see https://repost.aws/questions/QUoUZgHZh7SEWlnQUPlBmVNQ/announcement-rtmp-support-discontinuing-on-december-31-2020');
+export function getSignedRTMPUrl() {
+  throw new Error(
+    'Amazon CloudFront has deprecated RTMP distributions. For more information see https://repost.aws/questions/QUoUZgHZh7SEWlnQUPlBmVNQ/announcement-rtmp-support-discontinuing-on-december-31-2020',
+  );
 }
 
 /**
@@ -53,10 +62,12 @@ export function getSignedRTMPUrl () {
  * @param params - Signature parameters
  * @return List of CloudFront cookies
  */
-export function getSignedCookies (cfUrl: string, params: SignatureOptions): Record<string, string> {
+export function getSignedCookies(
+  cfUrl: string,
+  params: SignatureOptions,
+): Record<string, string> {
   const privateKey = getPrivateKey(params);
-  const policy = createPolicy(
-    cfUrl, getExpireTime(params), getIpRange(params));
+  const policy = createPolicy(cfUrl, getExpireTime(params), getIpRange(params));
   const signature = createPolicySignature(policy, privateKey);
   const policyStr = Buffer.from(policy.toJSON()).toString('base64');
 
