@@ -29,7 +29,7 @@ export interface SignatureOptions {
    */
   expireTime?: ExpireTime;
   /**
-   * Optional IP address or CIDR range (e.g. `192.0.2.0/24`) allowed to access
+   * Optional IPv4 CIDR range (e.g. `192.0.2.0/24`) allowed to access
    * the resource. Added to the policy as `AWS:SourceIp`.
    */
   ipRange?: string;
