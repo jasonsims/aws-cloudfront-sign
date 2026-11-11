@@ -1,8 +1,7 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  // Oxlint's own defaults plus the vitest plugin. Formatting belongs to
-  // Prettier and the TypeScript compiler covers what tsc can see, so this
-  // config stays limited to bugs and likely bugs.
+  // Oxlint's default plugins plus vitest, with its bug-finding categories as
+  // errors. Formatting belongs to Prettier and style rules are left out.
   "plugins": ["typescript", "unicorn", "oxc", "vitest"],
   "categories": {
     "correctness": "error",
@@ -11,26 +10,42 @@
   },
   "options": {
     "typeAware": true,
+    "denyWarnings": true,
     "reportUnusedDisableDirectives": "error"
-  },
-  "env": {
-    "builtin": true,
-    "node": true
   },
   "ignorePatterns": ["dist/", "coverage/"],
   "overrides": [
     {
-      // Type-safety rules from the `pedantic` and `restriction` categories.
-      // TypeScript files only: plain JS has no types, so every value is `any`.
+      // The usual typescript-eslint "recommended type-checked" guarantees.
+      // Oxlint files these under `pedantic`/`restriction`, so they are opted
+      // into one by one rather than enabling those whole categories.
       "files": ["**/*.{ts,mts,cts}"],
       "rules": {
+        // No escape hatches out of the type system
+        "typescript/ban-ts-comment": "error",
         "typescript/no-explicit-any": "error",
-        "typescript/no-misused-promises": "error",
+        "typescript/no-empty-object-type": "error",
+        "typescript/no-unsafe-function-type": "error",
         "typescript/no-unsafe-argument": "error",
         "typescript/no-unsafe-assignment": "error",
         "typescript/no-unsafe-call": "error",
         "typescript/no-unsafe-member-access": "error",
-        "typescript/no-unsafe-return": "error"
+        "typescript/no-unsafe-return": "error",
+        // Errors and promises
+        "typescript/only-throw-error": "error",
+        "typescript/prefer-promise-reject-errors": "error",
+        "typescript/no-misused-promises": "error",
+        "typescript/require-await": "error",
+        "typescript/no-deprecated": "error"
+      }
+    },
+    {
+      // tsc only checks src/, so scripts, examples and integration tests rely
+      // on the linter to catch undefined names.
+      "files": ["**/*.{js,mjs,cjs}"],
+      "env": { "builtin": true, "node": true },
+      "rules": {
+        "no-undef": "error"
       }
     }
   ]

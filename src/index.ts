@@ -1,5 +1,6 @@
 export {
   getSignedUrl,
+  // oxlint-disable-next-line typescript/no-deprecated -- still public API until removed
   getSignedRTMPUrl,
   getSignedCookies,
 } from './cloudfront-signer.js';

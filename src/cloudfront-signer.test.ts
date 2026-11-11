@@ -18,6 +18,19 @@ import moment from 'moment';
 import { getSignedUrl, getSignedCookies } from './cloudfront-signer';
 import { SignatureOptions } from './types';
 
+// Code of the error `fn` throws. Decryption failures come from Node's crypto
+// layer, whose codes and messages vary with the OpenSSL build
+// (ERR_OSSL_BAD_DECRYPT, ERR_MISSING_PASSPHRASE, ...), so tests only check
+// for a Node error code rather than an exact message.
+function thrownErrorCode(fn: () => unknown): unknown {
+  try {
+    fn();
+  } catch (err) {
+    return err instanceof Error && 'code' in err ? err.code : undefined;
+  }
+  throw new Error('Expected the function to throw');
+}
+
 // Reverse `normalizeBase64` and decode to raw bytes.
 function denormalizeBase64(str: string): Buffer {
   const safeBase64Chars = { '+': '-', '=': '_', '/': '~' };
@@ -291,22 +304,26 @@ describe('CloudfrontUtil', function () {
     });
 
     it('should throw with a wrong passphrase', () => {
-      expect(() =>
-        getSignedUrl('http://foo.com', {
-          keypairId: 'ABC123',
-          privateKeyString: encryptedKey,
-          privateKeyPassphrase: 'wrong passphrase',
-        }),
-      ).toThrow(/bad decrypt/);
+      expect(
+        thrownErrorCode(() =>
+          getSignedUrl('http://foo.com', {
+            keypairId: 'ABC123',
+            privateKeyString: encryptedKey,
+            privateKeyPassphrase: 'wrong passphrase',
+          }),
+        ),
+      ).toMatch(/^ERR_/);
     });
 
     it('should throw when the passphrase is missing', () => {
-      expect(() =>
-        getSignedUrl('http://foo.com', {
-          keypairId: 'ABC123',
-          privateKeyString: encryptedKey,
-        }),
-      ).toThrow(/interrupted or cancelled/);
+      expect(
+        thrownErrorCode(() =>
+          getSignedUrl('http://foo.com', {
+            keypairId: 'ABC123',
+            privateKeyString: encryptedKey,
+          }),
+        ),
+      ).toMatch(/^ERR_/);
     });
 
     it('should still reject a single line encrypted key', () => {
