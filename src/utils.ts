@@ -40,8 +40,19 @@ export function createPolicySignature(
   privateKey: string,
   passphrase?: string,
 ): string {
+  return signPolicy(policy.toJSON(), privateKey, passphrase);
+}
+
+/**
+ * Sign an already serialized policy.
+ */
+export function signPolicy(
+  policyJson: string,
+  privateKey: string,
+  passphrase?: string,
+): string {
   const sign = createSign('RSA-SHA1');
-  sign.update(policy.toJSON());
+  sign.update(policyJson);
 
   if (typeof passphrase === 'string') {
     return sign.sign({ key: privateKey, passphrase }, 'base64');
