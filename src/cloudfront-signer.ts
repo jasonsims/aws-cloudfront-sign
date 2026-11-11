@@ -3,8 +3,8 @@
  */
 
 import { URL } from 'node:url';
-import { SignatureOptions } from './types';
-import { getPrivateKey, createPolicy, createPolicySignature, getExpireTime, getIpRange, normalizeBase64 } from './utils';
+import { SignatureOptions } from './types.js';
+import { getPrivateKey, createPolicy, createPolicySignature, getExpireTime, getIpRange, normalizeBase64 } from './utils.js';
 
 /**
  * Build an AWS signed URL.
