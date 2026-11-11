@@ -125,7 +125,7 @@ function packTarget(target, workDir) {
     );
   }
 
-  const [tarball] = readdirSync(packDir).filter((f) => f.endsWith('.tgz'));
+  const tarball = readdirSync(packDir).find((f) => f.endsWith('.tgz'));
   if (!tarball) throw new Error(`No tarball produced for ${target}`);
   return join(packDir, tarball);
 }

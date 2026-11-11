@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import CannedPolicy from './canned-policy';
-import { AwsPolicy } from './types';
 
 describe('CannedPolicy', function () {
   it('should convert `expireTime` to seconds', () => {
@@ -47,7 +46,7 @@ describe('CannedPolicy', function () {
       );
       const result = policy.toJSON();
       // Parse the stringified result so we can examine it's properties.
-      const parsedResult = JSON.parse(result) as AwsPolicy;
+      const parsedResult: unknown = JSON.parse(result);
 
       expect(parsedResult).toHaveProperty(
         'Statement[0].Condition.IpAddress.AWS:SourceIp',
@@ -58,7 +57,7 @@ describe('CannedPolicy', function () {
       const policy = new CannedPolicy('http://t.com', Date.now() + 1000);
       const result = policy.toJSON();
       // Parse the stringified result so we can examine it's properties.
-      const parsedResult = JSON.parse(result) as AwsPolicy;
+      const parsedResult: unknown = JSON.parse(result);
 
       expect(parsedResult).toHaveProperty('Statement[0].Condition');
       expect(parsedResult).not.toHaveProperty(
@@ -71,7 +70,7 @@ describe('CannedPolicy', function () {
       const policy = new CannedPolicy('http://t.com', expireTimeMs);
       const result = policy.toJSON();
       // Parse the stringified result so we can examine it's properties.
-      const parsedResult = JSON.parse(result) as AwsPolicy;
+      const parsedResult: unknown = JSON.parse(result);
 
       expect(parsedResult).toHaveProperty(
         'Statement[0].Resource',
