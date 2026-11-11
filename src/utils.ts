@@ -81,6 +81,11 @@ export function getPrivateKey(params: SignatureOptions): string {
     privateKeyString = pem.toString('ascii');
   }
 
+  assert(
+    !!privateKeyString,
+    'Missing param: privateKeyString or privateKeyPath',
+  );
+
   const newLinePattern = /\r|\n/;
   const lineBreakExists = newLinePattern.test(privateKeyString);
   if (!lineBreakExists) {
