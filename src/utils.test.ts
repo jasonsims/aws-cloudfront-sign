@@ -1,4 +1,4 @@
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from 'vitest';
 import { normalizeBase64 } from './utils';
 
 describe('utils', () => {
@@ -12,6 +12,12 @@ describe('utils', () => {
     });
 
     it('should not alter valid characters', () => {
+      const sig = normalizeBase64('abcXYZ0123456789-_~');
+
+      expect(sig).toBe('abcXYZ0123456789-_~');
+    });
+
+    it('should only replace illegal characters within a string', () => {
       const sig = normalizeBase64('test+str');
 
       expect(sig).toBe('test-str');

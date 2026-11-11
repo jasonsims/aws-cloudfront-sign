@@ -1,4 +1,4 @@
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from 'vitest';
 import CannedPolicy from './canned-policy';
 import { AwsPolicy } from './types';
 
@@ -53,7 +53,8 @@ describe('CannedPolicy', function () {
       // Parse the stringified result so we can examine it's properties.
       const parsedResult = JSON.parse(result) as AwsPolicy;
 
-      expect(parsedResult).not.toHaveProperty('Statement[0].Condition.IpAddress.AWS:SourceIp');
+      expect(parsedResult).toHaveProperty('Statement[0].Condition');
+      expect(parsedResult).not.toHaveProperty('Statement[0].Condition.IpAddress');
     });
     it('should return the canned policy as stringified JSON', () => {
       const expireTimeMs = new Date().getTime() + 10000;
