@@ -22,8 +22,8 @@ export function normalizeBase64(str: string): string {
  */
 export function createPolicy(
   cfUrl: string,
-  expireTime: number,
-  ipRange: string,
+  expireTime?: number,
+  ipRange?: string,
 ): CannedPolicy {
   // If an expiration time isn't set, default to 30 minutes.
   const defaultExpireTime = Math.round(Date.now() + 1800000);
@@ -69,15 +69,15 @@ export function signPolicy(
  *
  * @see http://momentjs.com/docs
  */
-export function getExpireTime(opts: SignatureOptions): number {
-  return +opts.expireTime || null;
+export function getExpireTime(opts: SignatureOptions): number | undefined {
+  return (opts.expireTime !== undefined && +opts.expireTime) || undefined;
 }
 
 /**
  * Helper function for retrieving the IP range from the params object.
  */
-export function getIpRange(opts: SignatureOptions) {
-  return opts.ipRange || null;
+export function getIpRange(opts: SignatureOptions): string | undefined {
+  return opts.ipRange || undefined;
 }
 
 /**
@@ -109,7 +109,7 @@ export function getPrivateKey(params: SignatureOptions): string {
 /**
  * Assert that an expression evaluates to `true`
  */
-export function assert(assertion: boolean, msg: string) {
+export function assert(assertion: boolean, msg: string): asserts assertion {
   if (!assertion) {
     throw new Error(msg);
   }
