@@ -36,6 +36,7 @@
     "prepublishOnly": "npm run build",
     "release": "np",
     "test": "vitest run",
+    "test:integration": "node scripts/integration-test.mjs",
     "test:watch": "vitest"
   },
   "devDependencies": {
