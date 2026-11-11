@@ -7,7 +7,7 @@
 // PKCS#1 v1.5 signatures are deterministic, so any two versions that pass this
 // suite produce byte-identical signed URLs and cookies.
 //
-// Only uses Node built-ins available in Node 18 (the oldest supported engine).
+// Only uses Node built-ins available in Node 22 (the oldest supported engine).
 'use strict';
 
 const assert = require('node:assert/strict');

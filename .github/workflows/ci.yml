@@ -39,9 +39,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Dev tooling (vitest 5, commitlint 21) requires Node >= 22.12, so the
-        # test suite cannot run on 18/20. The `integration` job covers those
-        # against the packed tarball instead.
+        # Every Node major allowed by package.json#engines (>=22).
         node: [22, 24, 26]
     steps:
       - uses: actions/checkout@v7
@@ -92,9 +90,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Every Node major allowed by package.json#engines (>=18). Installs only
-        # the packed tarball (no devDependencies), so old Nodes are fine here.
-        node: [18, 20, 22, 24]
+        # Every Node major allowed by package.json#engines (>=22). Installs only
+        # the packed tarball (no devDependencies).
+        node: [22, 24, 26]
     steps:
       - uses: actions/checkout@v7
         with:

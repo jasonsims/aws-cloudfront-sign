@@ -15,7 +15,7 @@ A small utility for generating [signed URLs](https://docs.aws.amazon.com/AmazonC
 
 ## Usage
 ### Requirements
-* Node.js >=18
+* Node.js >=22
 * Active CloudFront distribution with origin configured
 
 ### Configuring CloudFront
@@ -53,6 +53,9 @@ const signedUrl = getSignedUrl('https://d111111abcdef8.cloudfront.net/path/to/ob
 ```
 
 ### Upgrading from 3.x to 4.x
+**Breaking:** Node.js 22 or later is required. Node.js 18 and 20 have reached end of life;
+if you can't upgrade yet, 3.x keeps working there.
+
 **Breaking:** the package now declares an `exports` map, so only these import paths resolve:
 `aws-cloudfront-sign`, `aws-cloudfront-sign/types`, `aws-cloudfront-sign/package.json` and
 `aws-cloudfront-sign/dist/*`. Deep imports into `dist/` are not part of the public API; if you

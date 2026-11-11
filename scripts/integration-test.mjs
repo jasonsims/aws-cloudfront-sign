@@ -40,8 +40,8 @@ const keyFile = join(repoRoot, 'test', 'files', 'dummy.pem');
 const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 
 // Load .env without overriding the real environment. Hand-rolled because
-// process.loadEnvFile() needs Node >= 20.12. Supports KEY=value (a ' #'
-// starts a comment), 'single' and "double" quotes; a double-quoted value may
+// Node's util.parseEnv() cuts unquoted values at any '#' (e.g. a URL
+// fragment). Supports KEY=value (a ' #' starts a comment), 'single' and "double" quotes; a double-quoted value may
 // span lines (for a PEM key).
 function readDotEnv(file) {
   const vars = {};
