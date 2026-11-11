@@ -1,0 +1,6 @@
+dist
+coverage
+package-lock.json
+CHANGELOG.md
+# Hand-maintained docs; Prettier would rewrite README's code samples
+*.md

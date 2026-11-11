@@ -11,7 +11,7 @@ npm install
 Installing dependencies also points Git at the hooks in `.githooks/` (via
 `git config core.hooksPath .githooks`):
 
-- `pre-commit` runs lint and tests
+- `pre-commit` runs lint, typecheck and tests
 - `commit-msg` checks your message with [commitlint](https://commitlint.js.org/)
 
 Skip them for a single commit with `git commit --no-verify`; CI runs the same checks.
